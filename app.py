@@ -1,508 +1,415 @@
-import streamlit as st
-import time
-from agents import build_reader_agent, build_search_agent, writer_chain, critic_chain
+"""Simple, responsive Streamlit interface for InsightForge."""
 
-# ── Page config ──────────────────────────────────────────────────────────────
+from __future__ import annotations
+
+import html
+import os
+import time
+from collections import Counter
+
+import streamlit as st
+
+
 st.set_page_config(
-    page_title="ResearchMind · AI Research Agent",
-    page_icon="🔬",
+    page_title="InsightForge — Research Intelligence",
+    page_icon="◈",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# ── Custom CSS ────────────────────────────────────────────────────────────────
-st.markdown("""
+# Streamlit Community Cloud stores configuration in st.secrets instead of .env.
+# Local environment variables still take precedence.
+for secret_name in (
+    "GROQ_API_KEY",
+    "GROQ_MODEL",
+    "MAX_OUTPUT_TOKENS",
+    "GOOGLE_API_KEY",
+    "OPENAI_API_KEY",
+    "TAVILY_API_KEY",
+):
+    try:
+        if secret_name in st.secrets:
+            os.environ.setdefault(secret_name, str(st.secrets[secret_name]))
+    except FileNotFoundError:
+        break
+
+from agents import ModelConfigurationError, answer_follow_up, provider_name  # noqa: E402
+from pipeline import ResearchRequest, export_markdown, run_research_pipeline  # noqa: E402
+from tools import format_evidence  # noqa: E402
+
+
+st.markdown(
+    """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap');
 
-/* ── Reset & base ── */
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif;
-    color: #e8e4dc;
-}
-
-.stApp {
-    background: #0a0a0f;
-    background-image:
-        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(255,140,50,0.12) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 40% at 80% 110%, rgba(255,80,30,0.08) 0%, transparent 55%);
-}
-
-/* ── Hide default streamlit chrome ── */
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding: 2rem 3rem 4rem; max-width: 1200px; }
-
-/* ── Hero header ── */
-.hero {
-    text-align: center;
-    padding: 3.5rem 0 2.5rem;
-    position: relative;
-}
-.hero-eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    color: #ff8c32;
-    margin-bottom: 1rem;
-    opacity: 0.9;
-}
-.hero h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(2.8rem, 6vw, 5rem);
-    font-weight: 800;
-    line-height: 1.0;
-    letter-spacing: -0.03em;
-    color: #f0ebe0;
-    margin: 0 0 1rem;
-}
-.hero h1 span {
-    color: #ff8c32;
-}
-.hero-sub {
-    font-size: 1.05rem;
-    font-weight: 300;
-    color: #a09890;
-    max-width: 520px;
-    margin: 0 auto;
-    line-height: 1.65;
+:root {
+    --bg: #f7f8f5;
+    --card: #ffffff;
+    --ink: #18211c;
+    --muted: #69756e;
+    --brand: #155e46;
+    --brand-dark: #104936;
+    --soft: #edf5f0;
+    --accent: #d7f57a;
+    --line: #dfe6e1;
 }
 
-/* ── Divider ── */
-.divider {
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,140,50,0.3), transparent);
-    margin: 2rem 0;
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
+.stApp { background: var(--bg); color: var(--ink); }
+#MainMenu, footer, header, [data-testid="stSidebar"] { display: none; }
+.block-container { max-width: 1080px; padding: 1.35rem 1.5rem 4rem; }
+
+.nav { display:flex; align-items:center; justify-content:space-between; padding:.25rem 0 1.8rem; }
+.brand { display:flex; align-items:center; gap:.65rem; font:800 1.02rem 'Manrope', sans-serif; color:var(--ink); }
+.brand-icon { width:32px; height:32px; display:grid; place-items:center; border-radius:9px; background:var(--brand); color:var(--accent); }
+.connection { display:flex; align-items:center; gap:.45rem; padding:.38rem .68rem; background:var(--card); border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:.72rem; }
+.connection-dot { width:7px; height:7px; border-radius:50%; background:#23a46b; }
+
+.hero { max-width:800px; margin:1.5rem auto 2rem; text-align:center; }
+.eyebrow { color:var(--brand); font:700 .72rem 'Manrope', sans-serif; letter-spacing:.13em; text-transform:uppercase; }
+.hero h1 { margin:.7rem 0 .8rem; color:var(--ink); font:800 clamp(2.25rem,5vw,4rem)/1.04 'Manrope', sans-serif; letter-spacing:-.05em; }
+.hero h1 span { color:var(--brand); }
+.hero p { max-width:650px; margin:auto; color:var(--muted); font-size:1rem; line-height:1.65; }
+
+.section-kicker { margin-top:2.25rem; color:var(--brand); font:700 .7rem 'Manrope',sans-serif; letter-spacing:.12em; text-transform:uppercase; }
+.section-heading { margin:.35rem 0 1rem; font:800 1.55rem 'Manrope',sans-serif; letter-spacing:-.025em; }
+
+[data-testid="stForm"] { padding:1.35rem 1.4rem 1.5rem; background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:0 14px 40px rgba(29,56,41,.055); }
+.stTextArea textarea, .stTextInput input, [data-baseweb="select"] > div {
+    background:#fbfcfa !important; border-color:var(--line) !important; border-radius:11px !important;
+}
+.stTextArea textarea:focus, .stTextInput input:focus { border-color:var(--brand) !important; box-shadow:0 0 0 3px rgba(21,94,70,.08) !important; }
+[data-testid="stExpander"] { background:#fafbf9; border:1px solid var(--line); border-radius:12px; }
+
+.stButton button, .stFormSubmitButton button, .stDownloadButton button, .stLinkButton a {
+    border-radius:10px !important; min-height:2.65rem; font-weight:700 !important;
+}
+.stButton button { background:var(--card); border-color:var(--line); color:var(--ink); }
+.stButton button:hover { border-color:var(--brand); color:var(--brand); }
+.stFormSubmitButton button { width:100%; background:var(--brand) !important; border:1px solid var(--brand) !important; color:white !important; }
+.stFormSubmitButton button:hover { background:var(--brand-dark) !important; border-color:var(--brand-dark) !important; }
+.stDownloadButton button { background:var(--accent) !important; border-color:var(--accent) !important; color:var(--ink) !important; }
+
+.agent-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:.65rem; margin:1.1rem 0 0; }
+.agent-card { padding:.9rem .8rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.agent-number { color:var(--brand); font:800 .68rem 'Manrope',sans-serif; }
+.agent-name { margin:.3rem 0 .12rem; color:var(--ink); font-weight:700; font-size:.82rem; }
+.agent-role { color:var(--muted); font-size:.68rem; line-height:1.3; }
+
+.metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:.7rem; margin:1rem 0 1.4rem; }
+.metric { padding:1rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.metric strong { display:block; color:var(--brand); font:800 1.4rem 'Manrope',sans-serif; }
+.metric span { color:var(--muted); font-size:.72rem; }
+
+[data-testid="stTabs"] [data-baseweb="tab-list"] { gap:.25rem; overflow-x:auto; }
+[data-testid="stTabs"] button { font-weight:700; white-space:nowrap; }
+[data-testid="stTabs"] [data-baseweb="tab-panel"] { padding-top:1.2rem; }
+.source-card { margin:.7rem 0 .35rem; padding:1rem 1.05rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.source-tags { display:flex; gap:.4rem; margin-bottom:.5rem; }
+.tag { padding:.2rem .48rem; background:var(--soft); border-radius:999px; color:var(--brand); font-size:.66rem; font-weight:700; }
+.source-title { color:var(--ink); font:700 .96rem 'Manrope',sans-serif; }
+.source-meta { margin:.2rem 0 .45rem; color:var(--muted); font-size:.72rem; }
+.source-summary { color:#4f5d55; font-size:.84rem; line-height:1.55; }
+[data-testid="stChatMessage"] { background:var(--card); border:1px solid var(--line); border-radius:13px; }
+.fine-print { max-width:680px; margin:3.5rem auto 0; text-align:center; color:#8a958e; font-size:.7rem; line-height:1.5; }
+
+@media (max-width: 760px) {
+    .block-container { padding:1rem .85rem 3rem; }
+    .nav { padding-bottom:.7rem; }
+    .connection span:last-child { display:none; }
+    .hero { margin:1.2rem auto 1.5rem; text-align:left; }
+    .hero h1 { font-size:2.35rem; }
+    .hero p { font-size:.92rem; }
+    [data-testid="stForm"] { padding:1rem; border-radius:15px; }
+    .agent-grid { grid-template-columns:repeat(2,1fr); }
+    .agent-card:last-child { grid-column:1 / -1; }
+    .metrics { grid-template-columns:repeat(2,1fr); }
 }
 
-/* ── Input card ── */
-.input-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,140,50,0.15);
-    border-radius: 16px;
-    padding: 2rem 2.5rem;
-    margin-bottom: 2rem;
-    backdrop-filter: blur(8px);
-}
-
-/* ── Streamlit input overrides ── */
-.stTextInput > div > div > input {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(255,140,50,0.25) !important;
-    border-radius: 10px !important;
-    color: #f0ebe0 !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 1rem !important;
-    padding: 0.75rem 1rem !important;
-    transition: border-color 0.2s, box-shadow 0.2s !important;
-}
-.stTextInput > div > div > input:focus {
-    border-color: #ff8c32 !important;
-    box-shadow: 0 0 0 3px rgba(255,140,50,0.12) !important;
-}
-.stTextInput > label {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.72rem !important;
-    letter-spacing: 0.15em !important;
-    text-transform: uppercase !important;
-    color: #ff8c32 !important;
-    font-weight: 500 !important;
-}
-
-/* ── Button ── */
-.stButton > button {
-    background: linear-gradient(135deg, #ff8c32 0%, #ff5a1a 100%) !important;
-    color: #0a0a0f !important;
-    font-family: 'Syne', sans-serif !important;
-    font-weight: 700 !important;
-    font-size: 0.95rem !important;
-    letter-spacing: 0.04em !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 0.7rem 2.2rem !important;
-    cursor: pointer !important;
-    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s !important;
-    box-shadow: 0 4px 20px rgba(255,140,50,0.3) !important;
-    width: 100%;
-}
-.stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 28px rgba(255,140,50,0.4) !important;
-    opacity: 0.95 !important;
-}
-.stButton > button:active {
-    transform: translateY(0) !important;
-}
-
-/* ── Pipeline step cards ── */
-.step-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px;
-    padding: 1.5rem 1.8rem;
-    margin-bottom: 1.2rem;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.3s;
-}
-.step-card.active {
-    border-color: rgba(255,140,50,0.4);
-    background: rgba(255,140,50,0.04);
-}
-.step-card.done {
-    border-color: rgba(80,200,120,0.3);
-    background: rgba(80,200,120,0.03);
-}
-.step-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    border-radius: 14px 0 0 14px;
-    background: rgba(255,255,255,0.05);
-    transition: background 0.3s;
-}
-.step-card.active::before { background: #ff8c32; }
-.step-card.done::before   { background: #50c878; }
-
-.step-header {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    margin-bottom: 0.3rem;
-}
-.step-num {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.15em;
-    color: #ff8c32;
-    opacity: 0.7;
-}
-.step-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #f0ebe0;
-}
-.step-status {
-    margin-left: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-}
-.status-waiting  { color: #555; }
-.status-running  { color: #ff8c32; }
-.status-done     { color: #50c878; }
-
-/* ── Result panels ── */
-.result-panel {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 14px;
-    padding: 1.8rem 2rem;
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
-}
-.result-panel-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 500;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: #ff8c32;
-    margin-bottom: 1rem;
-    padding-bottom: 0.7rem;
-    border-bottom: 1px solid rgba(255,140,50,0.15);
-}
-.result-content {
-    font-size: 0.92rem;
-    line-height: 1.8;
-    color: #cdc8bf;
-    white-space: pre-wrap;
-    font-family: 'DM Sans', sans-serif;
-}
-
-/* ── Report & feedback panels ── */
-.report-panel {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,140,50,0.2);
-    border-radius: 16px;
-    padding: 2rem 2.5rem;
-    margin-top: 1rem;
-}
-.feedback-panel {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(80,200,120,0.2);
-    border-radius: 16px;
-    padding: 2rem 2.5rem;
-    margin-top: 1rem;
-}
-.panel-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 1.2rem;
-    padding-bottom: 0.7rem;
-}
-.panel-label.orange {
-    color: #ff8c32;
-    border-bottom: 1px solid rgba(255,140,50,0.15);
-}
-.panel-label.green {
-    color: #50c878;
-    border-bottom: 1px solid rgba(80,200,120,0.15);
-}
-
-/* ── Progress text ── */
-.stSpinner > div { color: #ff8c32 !important; }
-
-/* ── Expander ── */
-details summary {
-    font-family: 'DM Mono', monospace !important;
-    font-size: 0.75rem !important;
-    color: #a09890 !important;
-    letter-spacing: 0.1em !important;
-    cursor: pointer;
-}
-
-/* ── Section heading ── */
-.section-heading {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 700;
-    color: #f0ebe0;
-    margin: 2rem 0 1rem;
-}
-
-/* ── Toast-style notice ── */
-.notice {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: #605850;
-    text-align: center;
-    margin-top: 3rem;
-    letter-spacing: 0.08em;
+@media (max-width: 420px) {
+    .hero h1 { font-size:2.05rem; }
+    .agent-grid { grid-template-columns:1fr; }
+    .agent-card:last-child { grid-column:auto; }
 }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 
-# ── Helper: render a step card ────────────────────────────────────────────────
-def step_card(num: str, title: str, state: str, desc: str = ""):
-    status_map = {
-        "waiting": ("WAITING", "status-waiting"),
-        "running": ("● RUNNING", "status-running"),
-        "done":    ("✓ DONE",   "status-done"),
-    }
-    label, cls = status_map.get(state, ("", ""))
-    card_cls = {"running": "active", "done": "done"}.get(state, "")
-    st.markdown(f"""
-    <div class="step-card {card_cls}">
-        <div class="step-header">
-            <span class="step-num">{num}</span>
-            <span class="step-title">{title}</span>
-            <span class="step-status {cls}">{label}</span>
-        </div>
-        {"<div style='font-size:0.82rem;color:#706860;margin-top:0.3rem;'>"+desc+"</div>" if desc else ""}
-    </div>
-    """, unsafe_allow_html=True)
+PERIODS = {
+    "30 days": 30,
+    "6 months": 183,
+    "1 year": 365,
+    "3 years": 1095,
+    "5 years": 1825,
+}
+
+AGENTS = {
+    "strategist": ("01", "Strategist", "Scopes the question"),
+    "collector": ("02", "Collector", "Finds live evidence"),
+    "analyst": ("03", "Analyst", "Maps the trends"),
+    "skeptic": ("04", "Skeptic", "Tests weak claims"),
+    "writer": ("05", "Researcher", "Writes the brief"),
+}
+
+for state_key, default in {
+    "research_result": None,
+    "followups": [],
+    "question_input": "",
+}.items():
+    if state_key not in st.session_state:
+        st.session_state[state_key] = default
 
 
-# ── Session state init ────────────────────────────────────────────────────────
-for key in ("results", "running", "done"):
-    if key not in st.session_state:
-        st.session_state[key] = {} if key == "results" else False
-
-
-# ── Hero ──────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="hero">
-    <div class="hero-eyebrow">Multi-Agent AI System</div>
-    <h1>Research<span>Mind</span></h1>
-    <p class="hero-sub">
-        Four specialized AI agents collaborate — searching, scraping, writing,
-        and critiquing — to deliver a polished research report on any topic.
-    </p>
+st.markdown(
+    f"""
+<div class="nav">
+  <div class="brand"><span class="brand-icon">◈</span>InsightForge</div>
+  <div class="connection"><span class="connection-dot"></span><span>{html.escape(provider_name())} connected</span></div>
 </div>
-<div class="divider"></div>
-""", unsafe_allow_html=True)
+<div class="hero">
+  <div class="eyebrow">Multi-agent research intelligence</div>
+  <h1>Research any domain.<br><span>See what is changing.</span></h1>
+  <p>Turn recent papers and news into a cited research brief—with trend analysis, counter-evidence, and clear uncertainty.</p>
+</div>
+""",
+    unsafe_allow_html=True,
+)
 
 
-# ── Layout: input left, pipeline right ───────────────────────────────────────
-col_input, col_spacer, col_pipeline = st.columns([5, 0.5, 4])
-
-with col_input:
-    st.markdown('<div class="input-card">', unsafe_allow_html=True)
-    topic = st.text_input(
-        "Research Topic",
-        placeholder="e.g. Quantum computing breakthroughs in 2025",
-        key="topic_input",
-        label_visibility="visible",
-    )
-    run_btn = st.button("⚡  Run Research Pipeline", use_container_width=True)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Example chips
-    st.markdown("""
-    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;">
-        <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:#605850;letter-spacing:0.1em;">TRY →</span>
-    """, unsafe_allow_html=True)
-    examples = ["LLM agents 2025", "CRISPR gene editing", "Fusion energy progress"]
-    for ex in examples:
-        st.markdown(f"""
-        <span style="
-            background:rgba(255,255,255,0.04);
-            border:1px solid rgba(255,255,255,0.08);
-            border-radius:6px;
-            padding:0.25rem 0.7rem;
-            font-size:0.75rem;
-            color:#a09890;
-            font-family:'DM Sans',sans-serif;
-            cursor:default;
-        ">{ex}</span>
-        """, unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-with col_pipeline:
-    st.markdown('<div class="section-heading">Pipeline</div>', unsafe_allow_html=True)
-
-    r = st.session_state.results
-    done = st.session_state.done
-
-    def s(step):
-        if not r:
-            return "waiting"
-        steps = ["search", "reader", "writer", "critic"]
-        idx = steps.index(step)
-        completed = list(r.keys())
-        # figure out which steps are done
-        if step in r:
-            return "done"
-        # which step is running now (first not in r)
-        if st.session_state.running:
-            for i, k in enumerate(steps):
-                if k not in r:
-                    return "running" if k == step else "waiting"
-        return "waiting"
-
-    step_card("01", "Search Agent",  s("search"), "Gathers recent web information")
-    step_card("02", "Reader Agent",  s("reader"), "Scrapes & extracts deep content")
-    step_card("03", "Writer Chain",  s("writer"), "Drafts the full research report")
-    step_card("04", "Critic Chain",  s("critic"), "Reviews & scores the report")
-
-
-# ── Run pipeline ──────────────────────────────────────────────────────────────
-if run_btn:
-    if not topic.strip():
-        st.warning("Please enter a research topic first.")
-    else:
-        st.session_state.results = {}
-        st.session_state.running = True
-        st.session_state.done = False
+examples = [
+    "Small language models and on-device AI",
+    "Green hydrogen storage trends",
+    "Generative AI in Indian higher education",
+]
+example_columns = st.columns(3)
+for column, example in zip(example_columns, examples):
+    if column.button(example, use_container_width=True):
+        st.session_state.question_input = f"What are the latest trends in {example}?"
         st.rerun()
 
-if st.session_state.running and not st.session_state.done:
-    results = {}
-    topic_val = st.session_state.topic_input
 
-    # ── Step 1: Search ──
-    with st.spinner("🔍  Search Agent is working…"):
-        search_agent = build_search_agent()
-        sr = search_agent.invoke({
-            "messages": [("user", f"Find recent, reliable and detailed information about: {topic_val}")]
-        })
-        results["search"] = sr["messages"][-1].content
-        st.session_state.results = dict(results)
-    st.rerun() if False else None   # keep inline for now
+with st.form("research_form"):
+    question = st.text_area(
+        "What do you want to research?",
+        key="question_input",
+        placeholder="Ask a focused research question…",
+        height=105,
+    )
 
-    # ── Step 2: Reader ──
-    with st.spinner("📄  Reader Agent is scraping top resources…"):
-        reader_agent = build_reader_agent()
-        rr = reader_agent.invoke({
-            "messages": [("user",
-                f"Based on the following search results about '{topic_val}', "
-                f"pick the most relevant URL and scrape it for deeper content.\n\n"
-                f"Search Results:\n{results['search'][:800]}"
-            )]
-        })
-        results["reader"] = rr["messages"][-1].content
-        st.session_state.results = dict(results)
+    basic_one, basic_two, basic_three = st.columns(3)
+    with basic_one:
+        period_label = st.selectbox("Time range", list(PERIODS), index=2)
+    with basic_two:
+        depth = st.selectbox("Depth", ["Quick scan", "Standard", "Deep dive"], index=1)
+    with basic_three:
+        language = st.selectbox("Language", ["English", "Hinglish", "Hindi"])
 
-    # ── Step 3: Writer ──
-    with st.spinner("✍️  Writer is drafting the report…"):
-        research_combined = (
-            f"SEARCH RESULTS:\n{results['search']}\n\n"
-            f"DETAILED SCRAPED CONTENT:\n{results['reader']}"
+    with st.expander("More options", expanded=False):
+        advanced_one, advanced_two, advanced_three = st.columns(3)
+        with advanced_one:
+            domain = st.text_input("Domain", placeholder="e.g. Healthcare AI")
+        with advanced_two:
+            region = st.text_input("Region", value="Global")
+        with advanced_three:
+            audience = st.selectbox(
+                "Audience",
+                ["Researcher", "General reader", "Student", "Founder / operator", "Policy professional"],
+            )
+
+        st.caption("Sources")
+        source_one, source_two, source_three = st.columns(3)
+        use_academic = source_one.checkbox("Academic papers", value=True)
+        use_news = source_two.checkbox("Recent news", value=True)
+        tavily_ready = bool(os.getenv("TAVILY_API_KEY"))
+        use_web = source_three.checkbox(
+            "General web",
+            value=tavily_ready,
+            disabled=not tavily_ready,
+            help="Add TAVILY_API_KEY to enable this source.",
         )
-        results["writer"] = writer_chain.invoke({
-            "topic": topic_val,
-            "research": research_combined
-        })
-        st.session_state.results = dict(results)
 
-    # ── Step 4: Critic ──
-    with st.spinner("🧐  Critic is reviewing the report…"):
-        results["critic"] = critic_chain.invoke({
-            "report": results["writer"]
-        })
-        st.session_state.results = dict(results)
-
-    st.session_state.running = False
-    st.session_state.done = True
-    st.rerun()
+    submitted = st.form_submit_button("Start research  →", use_container_width=True)
 
 
-# ── Results display ───────────────────────────────────────────────────────────
-r = st.session_state.results
+agent_cards = "".join(
+    f'<div class="agent-card"><div class="agent-number">{number}</div>'
+    f'<div class="agent-name">{name}</div><div class="agent-role">{role}</div></div>'
+    for number, name, role in AGENTS.values()
+)
+st.markdown(f'<div class="agent-grid">{agent_cards}</div>', unsafe_allow_html=True)
 
-if r:
-    st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-heading">Results</div>', unsafe_allow_html=True)
 
-    # Raw outputs in expanders
-    if "search" in r:
-        with st.expander("🔍 Search Results (raw)", expanded=False):
-            st.markdown(f'<div class="result-panel"><div class="result-panel-title">Search Agent Output</div>'
-                        f'<div class="result-content">{r["search"]}</div></div>', unsafe_allow_html=True)
+if submitted:
+    if not question.strip():
+        st.warning("Enter a research question first.")
+    elif not any((use_academic, use_news, use_web)):
+        st.warning("Select at least one source under More options.")
+    else:
+        research_request = ResearchRequest(
+            question=question.strip(),
+            domain=domain.strip() or "General",
+            days=PERIODS[period_label],
+            period_label=period_label,
+            region=region.strip() or "Global",
+            audience=audience,
+            depth=depth,
+            language=language,
+            use_academic=use_academic,
+            use_news=use_news,
+            use_web=use_web,
+        )
+        st.session_state.followups = []
 
-    if "reader" in r:
-        with st.expander("📄 Scraped Content (raw)", expanded=False):
-            st.markdown(f'<div class="result-panel"><div class="result-panel-title">Reader Agent Output</div>'
-                        f'<div class="result-content">{r["reader"]}</div></div>', unsafe_allow_html=True)
+        with st.status("Starting the research team…", expanded=True) as status:
+            progress_bar = st.progress(0)
+            progress_text = st.empty()
 
-    # Final report
-    if "writer" in r:
-        st.markdown("""
-        <div class="report-panel">
-            <div class="panel-label orange">📝 Final Research Report</div>
-        """, unsafe_allow_html=True)
-        st.markdown(r["writer"])   # render markdown natively
-        st.markdown("</div>", unsafe_allow_html=True)
+            def show_progress(step: str, state: str) -> None:
+                number, name, role = AGENTS[step]
+                position = list(AGENTS).index(step)
+                if state == "running":
+                    progress_text.markdown(f"**{number} · {name}** — {role}")
+                    progress_bar.progress(position / len(AGENTS))
+                else:
+                    progress_bar.progress((position + 1) / len(AGENTS))
 
-        # Download
+            try:
+                output = run_research_pipeline(research_request, on_progress=show_progress)
+                st.session_state.research_result = output
+                progress_text.markdown("**Done** — Your cited report is ready.")
+                status.update(label="Research complete", state="complete", expanded=False)
+            except ModelConfigurationError as exc:
+                status.update(label="Model configuration needed", state="error")
+                st.error(str(exc))
+            except Exception as exc:
+                status.update(label="Research stopped", state="error")
+                error_text = str(exc).lower()
+                if "request too large" in error_text or "error code: 413" in error_text:
+                    st.error("The model context limit was reached. Try Quick scan or a shorter time range.")
+                else:
+                    st.error(f"The run could not finish ({exc.__class__.__name__}). Please try again.")
+
+
+result = st.session_state.research_result
+if result:
+    evidence = result.get("evidence", [])
+    counts = Counter(item.get("kind", "Other") for item in evidence)
+    request_data = result.get("request", {})
+
+    st.markdown('<div class="section-kicker">Research complete</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading">Your intelligence brief</div>', unsafe_allow_html=True)
+    st.markdown(
+        f"""
+<div class="metrics">
+  <div class="metric"><strong>{len(evidence)}</strong><span>Total sources</span></div>
+  <div class="metric"><strong>{counts.get('Academic', 0)}</strong><span>Academic papers</span></div>
+  <div class="metric"><strong>{counts.get('News', 0) + counts.get('Web', 0)}</strong><span>Current signals</span></div>
+  <div class="metric"><strong>5</strong><span>Agent checks</span></div>
+</div>
+""",
+        unsafe_allow_html=True,
+    )
+
+    for warning in result.get("warnings", []):
+        st.warning(warning)
+    if not evidence:
+        st.warning("No live sources matched. Try broader wording or a longer time range.")
+
+    report_tab, trends_tab, evidence_tab, review_tab, method_tab = st.tabs(
+        ["Brief", "Trends", "Evidence", "Critical review", "Method"]
+    )
+
+    with report_tab:
+        st.markdown(result.get("report", ""))
         st.download_button(
-            label="⬇  Download Report (.md)",
-            data=r["writer"],
-            file_name=f"research_report_{int(time.time())}.md",
+            "Download report",
+            data=export_markdown(result),
+            file_name=f"insightforge_{int(time.time())}.md",
             mime="text/markdown",
         )
 
-    # Critic feedback
-    if "critic" in r:
-        st.markdown("""
-        <div class="feedback-panel">
-            <div class="panel-label green">🧐 Critic Feedback</div>
-        """, unsafe_allow_html=True)
-        st.markdown(r["critic"])
-        st.markdown("</div>", unsafe_allow_html=True)
+    with trends_tab:
+        st.markdown(result.get("trends", ""))
+
+    with evidence_tab:
+        if evidence:
+            available_kinds = ["All"] + sorted({item.get("kind", "Other") for item in evidence})
+            selected_kind = st.selectbox("Show", available_kinds, key="evidence_filter")
+            visible_evidence = (
+                evidence
+                if selected_kind == "All"
+                else [item for item in evidence if item.get("kind") == selected_kind]
+            )
+            for item in visible_evidence:
+                title = html.escape(str(item.get("title") or "Untitled"))
+                summary = html.escape(str(item.get("summary") or "No excerpt available."))
+                source_meta = " · ".join(
+                    filter(None, [str(item.get("publisher") or ""), str(item.get("published") or "")])
+                )
+                st.markdown(
+                    f'<div class="source-card"><div class="source-tags">'
+                    f'<span class="tag">{html.escape(str(item.get("id")))}</span>'
+                    f'<span class="tag">{html.escape(str(item.get("kind")))}</span></div>'
+                    f'<div class="source-title">{title}</div>'
+                    f'<div class="source-meta">{html.escape(source_meta)}</div>'
+                    f'<div class="source-summary">{summary}</div></div>',
+                    unsafe_allow_html=True,
+                )
+                source_url = str(item.get("url") or "")
+                if source_url.startswith(("http://", "https://")):
+                    st.link_button("Open source ↗", source_url)
+        else:
+            st.info("No evidence records are available for this run.")
+
+    with review_tab:
+        st.markdown(result.get("challenge", ""))
+
+    with method_tab:
+        st.markdown("### Research strategy")
+        st.markdown(result.get("strategy", ""))
+        with st.expander("Run configuration"):
+            if isinstance(request_data, dict):
+                st.json(request_data)
+
+    st.markdown('<div class="section-kicker">Follow-up</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-heading">Ask the evidence</div>', unsafe_allow_html=True)
+    for message in st.session_state.followups:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    follow_up = st.chat_input("Ask about a source, contradiction, trend, or research gap…")
+    if follow_up:
+        st.session_state.followups.append({"role": "user", "content": follow_up})
+        with st.chat_message("user"):
+            st.markdown(follow_up)
+        research_context = "\n\n".join(
+            [
+                str(result.get("report", "")),
+                str(result.get("challenge", "")),
+                format_evidence(evidence),
+            ]
+        )
+        with st.chat_message("assistant"):
+            with st.spinner("Checking the evidence…"):
+                try:
+                    answer = answer_follow_up(
+                        research_context,
+                        follow_up,
+                        str(request_data.get("language", "English"))
+                        if isinstance(request_data, dict)
+                        else "English",
+                    )
+                except Exception:
+                    answer = "I could not answer that follow-up. Please try again."
+                st.markdown(answer)
+        st.session_state.followups.append({"role": "assistant", "content": answer})
 
 
-# ── Footer ────────────────────────────────────────────────────────────────────
-st.markdown("""
-<div class="notice">
-    ResearchMind · Powered by LangChain multi-agent pipeline · Built with Streamlit
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div class="fine-print">InsightForge uses OpenAlex, Google News, and optional Tavily. '
+    "AI synthesis can be wrong—verify important claims against the linked primary sources.</div>",
+    unsafe_allow_html=True,
+)
