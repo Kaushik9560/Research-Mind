@@ -46,13 +46,13 @@ Second, the \textbf{Reader Agent} reads all the collected abstracts and snippets
 
 Third, the \textbf{Writer Chain} uses the Reader's notes and the original source records to create the final report. Every source receives an ID such as S1 or S2, and the Writer uses these IDs as citations. The prompt also tells the model not to invent sources or statistics and to mention uncertainty when the evidence is weak.
 
-Fourth, the \textbf{Critic Chain} checks the completed report. It gives a score, explains the strengths, and points out unsupported claims, bias, missing evidence, or overconfidence.
-
-Gemini is the main model for the Search, Reader, and Writer stages. Groq is used as an optional independent Critic. If Groq is not configured, Gemini also performs the review. I kept this rule fixed instead of creating a complicated model-routing system.
+Fourth, the \textbf{Critic Chain} receives the completed report and the same source records. It checks whether important claims are supported, whether citation IDs exist, and whether the report contains bias, missing evidence, contradictions, or overconfident conclusions. It returns a score, strengths, areas to improve, and a final verdict. Gemini is the main model for Search, Reader, and Writer. Groq is the optional independent Critic; if it is not configured, Gemini performs the review. The Critic is still an LLM reviewer, not a guaranteed fact checker, and its feedback is shown separately instead of automatically changing the report.
 
 The frontend is built with Streamlit. The user can select the time range, research depth, language, region, audience, and sources. The application shows progress for all four stages and displays the report, Reader notes, sources, Critic feedback, and Search plan in separate tabs. The user can also download the report and ask follow-up questions.
 
-One important limitation is that the system mainly uses abstracts and snippets. A valid source ID also does not guarantee that the source fully supports every claim. For high-stakes research, the user should open and verify the original sources. In the future, I would add automatic claim-citation verification and full-text support through official APIs.
+One important limitation is that the system mainly uses abstracts and snippets. A valid source ID also does not guarantee that the source fully supports every claim. For high-stakes research, the user should open and verify the original sources.
+
+My first future improvement would be a controlled Writer--Critic revision loop: the Critic reviews the draft, the Writer revises it once, and a final validation checks the result. I would also add a Python citation-ID validator, claim-to-source support checking, structured JSON feedback, source-quality scoring, and official full-text APIs. For medical, legal, or financial research, I would keep a human approval step before the final report is used.
 
 Overall, this project shows how I converted a simple tutorial workflow into a practical research product while keeping the code readable, sequential, and easy to explain.
 \end{tcolorbox}
