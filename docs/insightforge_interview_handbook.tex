@@ -1,135 +1,102 @@
 \documentclass[11pt,a4paper]{article}
 
-\usepackage[a4paper,margin=18mm,top=20mm,bottom=22mm]{geometry}
+\usepackage[margin=18mm]{geometry}
+\usepackage{fontspec}
 \usepackage{xcolor}
-\usepackage{hyperref}
-\usepackage{tabularx}
 \usepackage{booktabs}
-\usepackage{longtable}
-\usepackage{array}
+\usepackage{tabularx}
 \usepackage{enumitem}
 \usepackage{listings}
 \usepackage[most]{tcolorbox}
 \usepackage{fancyhdr}
-\usepackage{lastpage}
+\usepackage{hyperref}
 \usepackage{microtype}
 \usepackage{amssymb}
-\usepackage{tikz}
-\usepackage{titlesec}
-\usetikzlibrary{arrows.meta,positioning,fit}
+
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
 
 \definecolor{Brand}{HTML}{155E46}
-\definecolor{BrandDark}{HTML}{103F31}
-\definecolor{Accent}{HTML}{D7F57A}
-\definecolor{Ink}{HTML}{18211C}
-\definecolor{Muted}{HTML}{65736B}
-\definecolor{Paper}{HTML}{F7F8F5}
+\definecolor{BrandDark}{HTML}{123D2F}
 \definecolor{Soft}{HTML}{EDF5F0}
-\definecolor{Line}{HTML}{DDE5DF}
-\definecolor{CodeBg}{HTML}{F2F5F3}
-\definecolor{Warn}{HTML}{A64B15}
+\definecolor{Ink}{HTML}{18211C}
+\definecolor{Muted}{HTML}{66736C}
+\definecolor{Line}{HTML}{DCE5DF}
+\definecolor{CodeBg}{HTML}{F5F7F5}
 
 \hypersetup{
   colorlinks=true,
-  linkcolor=BrandDark,
+  linkcolor=Brand,
   urlcolor=Brand,
-  citecolor=Brand
+  pdftitle={Research-Mind Project Explanation Guide},
+  pdfauthor={Kaushik Sharma}
 }
 
 \pagestyle{fancy}
 \fancyhf{}
-\lhead{\textcolor{Brand}{\textbf{Research-Mind / InsightForge}}}
-\rhead{Interview Handbook}
-\cfoot{\textcolor{Muted}{Page \thepage\ of \pageref{LastPage}}}
+\lhead{\color{Brand}\textbf{Research-Mind}}
+\rhead{\color{Muted}Project Explanation Guide}
+\cfoot{\color{Muted}\thepage}
 \renewcommand{\headrulewidth}{0.4pt}
 
-\titleformat{\section}{\Large\bfseries\color{BrandDark}}{\thesection}{0.6em}{}
-\titleformat{\subsection}{\large\bfseries\color{Ink}}{\thesubsection}{0.6em}{}
-\titleformat{\subsubsection}{\normalsize\bfseries\color{Brand}}{\thesubsubsection}{0.6em}{}
-\setlist[itemize]{leftmargin=1.4em,itemsep=3pt,topsep=4pt}
-\setlist[enumerate]{leftmargin=1.6em,itemsep=3pt,topsep=4pt}
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
-\renewcommand{\arraystretch}{1.18}
+\setlist[itemize]{leftmargin=6mm,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=7mm,itemsep=3pt,topsep=3pt}
 
-\lstdefinestyle{code}{
-  backgroundcolor=\color{CodeBg},
+\newtcolorbox{keybox}[1][]{
+  colback=Soft,colframe=Brand,boxrule=.7pt,arc=2mm,
+  title=#1,fonttitle=\bfseries,coltitle=white,colbacktitle=Brand
+}
+
+\newtcolorbox{answerbox}{
+  colback=white,colframe=Line,boxrule=.7pt,arc=2mm,
+  left=3mm,right=3mm,top=2mm,bottom=2mm
+}
+
+\lstset{
   basicstyle=\ttfamily\small,
-  keywordstyle=\color{BrandDark}\bfseries,
-  stringstyle=\color{Warn},
-  commentstyle=\color{Muted}\itshape,
-  numbers=left,
-  numberstyle=\tiny\color{Muted},
-  numbersep=8pt,
+  backgroundcolor=\color{CodeBg},
   frame=single,
   rulecolor=\color{Line},
   breaklines=true,
   showstringspaces=false,
-  columns=fullflexible,
-  keepspaces=true,
-  xleftmargin=8pt,
-  framexleftmargin=6pt
-}
-\lstset{style=code}
-
-\newtcolorbox{keybox}[1][]{
-  enhanced,
-  colback=Soft,
-  colframe=Brand,
-  boxrule=0.6pt,
-  arc=3mm,
-  left=3mm,right=3mm,top=2mm,bottom=2mm,
-  title=#1,
-  coltitle=white,
-  colbacktitle=Brand,
-  fonttitle=\bfseries
+  keywordstyle=\color{Brand}\bfseries,
+  commentstyle=\color{Muted},
+  columns=fullflexible
 }
 
-\newtcolorbox{answerbox}{
-  colback=Paper,
-  colframe=Line,
-  boxrule=0.5pt,
-  arc=2mm,
-  left=3mm,right=3mm,top=2mm,bottom=2mm
-}
-
-\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
-\newcommand{\interview}[1]{\textbf{Interview line:} ``#1''}
-\newcommand{\file}[1]{\textcolor{BrandDark}{\nolinkurl{#1}}}
+\newcommand{\code}[1]{\texttt{#1}}
 
 \begin{document}
 
-% -----------------------------------------------------------------------------
-% Title page
-% -----------------------------------------------------------------------------
 \begin{titlepage}
-  \pagecolor{Paper}
-  \vspace*{18mm}
+  \pagecolor{Soft}
   \begin{center}
-    {\fontsize{18}{22}\selectfont\color{Brand}\bfseries MULTI-AGENT RESEARCH INTELLIGENCE}\par
+    \vspace*{25mm}
+    {\large\color{Brand}\bfseries MULTI-AGENT RESEARCH PROJECT}\par
     \vspace{8mm}
-    {\fontsize{38}{43}\selectfont\color{Ink}\bfseries Research-Mind}\par
-    \vspace{2mm}
-    {\fontsize{24}{29}\selectfont\color{BrandDark}\bfseries InsightForge}\par
-    \vspace{7mm}
-    {\Large From scratch to production deployment}\par
-    \vspace{4mm}
-    {\large Interview-oriented project handbook in Hinglish}\par
+    {\fontsize{38}{44}\selectfont\color{Ink}\bfseries Research-Mind}\par
+    \vspace{3mm}
+    {\fontsize{22}{27}\selectfont\color{BrandDark}InsightForge}\par
+    \vspace{10mm}
+    {\Large Project Explanation Guide}\par
+    \vspace{3mm}
+    {\large Interview ke liye sirf zaroori coverage}\par
 
     \vspace{18mm}
-    \begin{tcolorbox}[width=.86\textwidth,colback=white,colframe=Line,arc=4mm,boxrule=.6pt]
+    \begin{tcolorbox}[width=.86\textwidth,colback=white,colframe=Line,arc=3mm]
       \centering
-      \textbf{Problem} \(\rightarrow\) \textbf{Evidence collection} \(\rightarrow\)
-      \textbf{Multi-agent analysis} \(\rightarrow\) \textbf{Cited report}\\[3mm]
+      \textbf{Search Agent} $\rightarrow$ \textbf{Reader Agent}
+      $\rightarrow$ \textbf{Writer Chain} $\rightarrow$ \textbf{Critic Chain}\\[3mm]
       OpenAlex + Google News + optional Tavily\\
       Gemini research + optional Groq critic\\
-      Streamlit + LangChain + Docker + Streamlit Cloud
+      Streamlit UI + Docker/Cloud deployment
     \end{tcolorbox}
 
     \vfill
-    {\large Prepared as a complete revision and interview guide}\par
-    \vspace{2mm}
-    {\color{Muted}No API keys or private credentials are included in this document.}
+    {\color{Muted}Goal: project ko clearly explain karna, code ko defend karna, aur honest limitations batana.}
   \end{center}
 \end{titlepage}
 \nopagecolor
@@ -138,215 +105,116 @@
 \newpage
 
 % -----------------------------------------------------------------------------
-\section{Sabse Pehle: 60-Second Project Summary}
+\section{Project Ko 60 Seconds Mein Kaise Explain Karein}
 
 \begin{keybox}[One-line definition]
-InsightForge original tutorial ke simple \textbf{Search Agent $\rightarrow$ Reader Agent $\rightarrow$ Writer Chain $\rightarrow$ Critic Chain} template par bana multi-agent research platform hai. Yeh recent academic papers, news aur optional web sources collect karke cited report aur independent feedback generate karta hai.
+Research-Mind ek evidence-based research application hai jo recent papers aur news search karta hai, sources ko compare karta hai, cited report likhta hai, aur final report ko Critic se review karwata hai.
 \end{keybox}
 
-\subsection{Problem kya solve hoti hai?}
+\subsection{Hinglish pitch}
 
-Normal search engine links de deta hai, aur normal chatbot fluent answer de deta hai. Dono mein ek gap hai:
+\begin{answerbox}
+``Maine tutorial ke Search Agent, Reader Agent, Writer Chain aur Critic Chain ko base rakha. Search stage OpenAlex, Google News aur optional Tavily se live sources laati hai. Reader un sources ko compare karta hai, Writer source IDs ke saath report banata hai, aur Groq Critic weak claims check karta hai. Gemini main research model hai. Maine iske upar responsive Streamlit UI, report export, follow-up Q\&A aur deployment support add kiya.''
+\end{answerbox}
+
+\subsection{English pitch}
+
+\begin{answerbox}
+``I upgraded a tutorial-based Search--Reader--Writer--Critic workflow into a usable research application. It retrieves recent scholarly and news evidence, assigns traceable source IDs, compares findings, writes a cited report, and runs an optional independent Groq review. Gemini handles the main research stages, while Streamlit provides the interface, export, and follow-up experience.''
+\end{answerbox}
+
+\subsection{Problem and users}
+
+Search engine links deta hai, jabki normal chatbot fluent answer deta hai lekin source grounding weak ho sakti hai. Project dono ko combine karta hai.
+
+Target users:
 
 \begin{itemize}
-  \item researcher ko recent aur relevant evidence chahiye;
-  \item student ko complex topic ka structured overview chahiye;
-  \item founder ya policy professional ko trend ke saath counter-evidence bhi chahiye;
-  \item har important claim ka source traceable hona chahiye;
-  \item ek hi LLM ke bias aur hallucination ko blindly trust nahi karna chahiye.
+  \item student jo kisi topic ka reliable overview chahta hai;
+  \item researcher jo latest papers aur signals compare karna chahta hai;
+  \item founder/policy professional jo trends aur limitations dono dekhna chahta hai;
+  \item koi bhi person jo source-linked research brief chahta hai.
 \end{itemize}
-
-InsightForge is gap ko evidence-first workflow aur specialized agents se solve karta hai.
-
-\subsection{English elevator pitch}
-
-\begin{answerbox}
-``I started with a tutorial-based Search, Reader, Writer, and Critic workflow, then upgraded it with live academic and news sources, source IDs, a responsive UI, and deployment support. Gemini handles the first three stages and Groq provides an optional independent Critic.''
-\end{answerbox}
-
-\subsection{Hinglish elevator pitch}
-
-\begin{answerbox}
-``Maine tutorial ke Search Agent, Reader Agent, Writer Chain aur Critic Chain ko base rakha. Search live papers/news laata hai, Reader evidence compare karta hai, Writer cited report banata hai aur Groq Critic weak claims check karta hai. Code ko jaan-boojhkar direct aur interview-friendly rakha hai.''
-\end{answerbox}
-
-\subsection{Project ke strongest differentiators}
-
-\begin{enumerate}
-  \item \textbf{Live evidence, not model memory only.}
-  \item \textbf{Independent review:} Groq available ho to completed report ko separately check karta hai.
-  \item \textbf{Simple model rule:} Gemini research, Groq critic; no routing matrix.
-  \item \textbf{Stable source IDs} report ko auditable banate hain.
-  \item \textbf{Graceful degradation:} source ya provider fail ho to poora app unnecessarily crash nahi karta.
-  \item \textbf{Production readiness:} responsive UI, secrets, Docker, health check, deployment guide.
-\end{enumerate}
 
 % -----------------------------------------------------------------------------
-\section{Project Kahan Se Start Hua: Actual Evolution}
+\section{Original Tutorial Se Final Project Tak}
 
-\subsection{Starting point}
-
-Original repository ek basic multi-agent research demo tha. Usmein broadly chaar ideas the:
-
-\begin{itemize}
-  \item Search Agent web results leta tha.
-  \item Reader Agent ek URL scrape karta tha.
-  \item Writer Chain report banati thi.
-  \item Critic Chain score aur feedback deti thi.
-\end{itemize}
-
-Yeh learning demo achha tha, lekin real product ke liye limitations thi: Tavily dependency, single scraped page, generic report, no strong evidence library, no source IDs, aur demo-like UI.
-
-\subsection{Idea pivots aur final requirement}
-
-Conversation mein pehle daily-life assistant aur education assistant jaise ideas explore hue. Final requirement clear hui:
-
-\begin{quote}
-``Aisa product jo researcher, student ya kisi bhi domain mein research karne wale insaan ko latest trends analyze karne mein help kare.''
-\end{quote}
-
-Is requirement se product ke five pillars nikle:
-
-\begin{enumerate}
-  \item Domain-agnostic research question.
-  \item Recent sources with configurable time window.
-  \item Trend analysis, not only summarization.
-  \item Counter-evidence and uncertainty.
-  \item Proper UI and deployability.
-\end{enumerate}
-
-\subsection{Actual refactoring order}
-
-Repository mein files pehle se thi, isliye unhe zero se random order mein create nahi kiya gaya; unko product architecture ke according refactor kiya gaya. Actual logical order yeh tha:
-
-\begin{longtable}{>{\bfseries}p{.09\textwidth} p{.23\textwidth} p{.60\textwidth}}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{.22\textwidth} X X}
 \toprule
-Step & File / concern & Kya banaya gaya \\
+Stage & Original idea & Current improvement \\
 \midrule
-1 & Product scope & Generic report generator ko universal research intelligence product define kiya. \\
-2 & \file{agents.py} & Original two-agent/two-chain contract preserve karke grounded prompts aur provider abstraction add ki. \\
-3 & \file{tools.py} & OpenAlex, Google News RSS aur optional Tavily collectors banaye. \\
-4 & \file{pipeline.py} & Original four sequential stages, simple dictionary state and progress callback banaye. \\
-5 & \file{app.py} & Responsive Streamlit experience, progress, tabs, evidence cards aur follow-up chat banaya. \\
-6 & Reliability & Query normalization, source timeouts, bounded snippets and deduplication add hue. \\
-7 & Models & Simple rule rakha: Gemini research aur optional Groq critic. \\
-8 & Deployment & Requirements, secrets examples, Streamlit config, Dockerfile, runtime and docs add hue. \\
-9 & Verification & Syntax, utility, live source, full pipeline, health endpoint aur AppTest checks hue. \\
+Search Agent & Tavily web search & Search plan + OpenAlex + Google News + optional Tavily \\
+Reader Agent & Ek selected URL scrape & Saare retrieved abstracts/snippets compare \\
+Writer Chain & Generic report & Source-ID citations, uncertainty and audience-aware report \\
+Critic Chain & Score and feedback & Source support, bias, missing evidence and overconfidence check \\
+Interface & Basic Streamlit/demo output & Responsive form, progress, tabs, source cards, download, follow-up \\
+Models & One OpenAI model & Gemini research + optional Groq critic \\
 \bottomrule
-\end{longtable}
+\end{tabularx}
 
-\begin{keybox}[Interview clarity]
-Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: tutorial repository mein \file{agents.py}, \file{tools.py}, \file{pipeline.py} aur \file{app.py} skeleton already tha. Humne same learning order aur names preserve kiye: tools/agents samjhe, four-step pipeline improve ki, phir UI aur deployment add kiya.
+\begin{keybox}[Interview mein honest line]
+Maine tutorial ka mental model replace nahi kiya. Maine same four stages ko better sources, grounded prompts aur proper UI ke saath improve kiya. Code ko deliberately sequential aur simple rakha hai.
 \end{keybox}
 
 % -----------------------------------------------------------------------------
-\section{Requirements Se Architecture Tak}
-
-\subsection{Functional requirements}
-
-\begin{itemize}
-  \item User research question, time range, depth, language, domain, region aur audience de sake.
-  \item Academic papers and recent news default source hon.
-  \item Tavily key ho to general web optional source ho.
-  \item Output mein report, Reader notes, source library, Critic feedback and Search plan ho.
-  \item User source-grounded follow-up question pooch sake.
-  \item Full report Markdown mein download ho sake.
-  \item English, Hinglish aur Hindi output support ho.
-\end{itemize}
-
-\subsection{Non-functional requirements}
-
-\begin{itemize}
-  \item Responsive and simple UI.
-  \item Network calls ke liye timeouts and isolated failures.
-  \item API keys source control se bahar.
-  \item Token/rate-limit aware prompts.
-  \item Traceability through source IDs.
-  \item Simple, explainable model selection.
-  \item Local, Streamlit Cloud and Docker deployment.
-\end{itemize}
+\section{Architecture and Complete Flow}
 
 \subsection{High-level architecture}
 
 \begin{center}
-\begin{tikzpicture}[
-  node distance=8mm and 11mm,
-  box/.style={draw=Line,fill=white,rounded corners=2mm,minimum height=10mm,align=center,text width=34mm},
-  agent/.style={box,draw=Brand,fill=Soft},
-  data/.style={box,draw=Warn!60,fill=orange!5},
-  arrow/.style={-{Latex[length=2mm]},thick,color=BrandDark}
-]
-  \node[box] (ui) {Streamlit UI\\\small request + settings};
-  \node[agent,below=of ui] (pipe) {Pipeline Orchestrator\\\small shared state};
-  \node[agent,below=of pipe] (search) {1. Search Agent\\\small plan + live source tools};
-  \node[data,below=of search] (reader) {2. Reader Agent\\\small compare all evidence};
-  \node[agent,below=of reader] (writer) {3. Writer Chain\\\small cited report};
-  \node[agent,below=of writer] (critic) {4. Critic Chain\\\small independent provider};
-  \node[box,below=of critic] (result) {Report + Reader notes + Sources\\Critic feedback + Export + Q\&A};
-
-  \draw[arrow] (ui) -- (pipe);
-  \draw[arrow] (pipe) -- (search);
-  \draw[arrow] (search) -- (reader);
-  \draw[arrow] (reader) -- (writer);
-  \draw[arrow] (writer) -- (critic);
-  \draw[arrow] (critic) -- (result);
-\end{tikzpicture}
+\begin{tcolorbox}[width=.72\textwidth,colback=white,colframe=Brand,arc=2mm]
+\centering
+\textbf{Streamlit UI}\\
+$\downarrow$\\
+\textbf{1. Search Agent}\\
+Search plan + live source functions\\
+$\downarrow$\\
+\textbf{2. Reader Agent}\\
+Compare every retrieved record\\
+$\downarrow$\\
+\textbf{3. Writer Chain}\\
+Generate cited report\\
+$\downarrow$\\
+\textbf{4. Critic Chain}\\
+Score and review completed report\\
+$\downarrow$\\
+\textbf{Report + Sources + Feedback + Export + Follow-up}
+\end{tcolorbox}
 \end{center}
 
-\subsection{Why sequential pipeline?}
-
-Stages ka order tutorial jaisa dependency-driven hai. Reader ko Search results chahiye, Writer ko Reader notes chahiye, aur Critic ko completed report chahiye. Simplicity ke liye source calls bhi seedhe one-by-one run hote hain.
-
-\interview{I kept the pipeline deliberately sequential so its execution order is obvious in an interview and easy to debug.}
-
-% -----------------------------------------------------------------------------
-\section{Technology Stack: Kya Use Kiya Aur Kyun}
-
-\begin{longtable}{p{.20\textwidth} p{.22\textwidth} p{.49\textwidth}}
-\toprule
-Layer & Technology & Reason \\
-\midrule
-Frontend & Streamlit & Python-only rapid product UI, forms, progress status, tabs, chat, download and cloud deployment. \\
-Prompt orchestration & LangChain Core & \code{ChatPromptTemplate}, runnable pipe operator and \code{StrOutputParser}. \\
-Primary synthesis & Google Gemini & Evidence-heavy context and strong synthesis for Standard/Deep runs. \\
-Independent review & Groq-hosted model & Fast second-provider adversarial review; reduces single-model correlation. \\
-Academic source & OpenAlex REST API & Recent scholarly metadata, abstracts, authors, venue, date, citation count; no required API key. \\
-News source & Google News RSS & Recent reporting through RSS/XML without a dedicated paid key. \\
-Optional web source & Tavily API & General web snippets for domains not fully covered by papers/news. \\
-HTTP/XML & Requests + ElementTree & Lightweight network calls and standard-library RSS parsing. \\
-Configuration & python-dotenv + st.secrets & Same application works locally and on Streamlit Cloud. \\
-Packaging & requirements.txt & Reproducible Python dependencies. \\
-Deployment & Streamlit Cloud + Docker & Easy public hosting plus portable container option. \\
-Version control & Git/GitHub & Source history, deployment integration and automatic redeploy on push. \\
-\bottomrule
-\end{longtable}
-
-\subsection{Why not LangGraph?}
-
-Current workflow ek fixed DAG hai without looping, human approval, checkpointing or branch recovery. Simple functions and a state dictionary are easier to explain and maintain. LangGraph tab justified hoga jab iterative search, human-in-the-loop, persistent checkpoints, retries per node, ya conditional branching add karenge.
-
-\interview{I avoided framework over-engineering. The workflow is deterministic enough for plain orchestration; LangGraph becomes valuable when the state machine becomes genuinely dynamic.}
-
-% -----------------------------------------------------------------------------
-\section{File-by-File Deep Walkthrough}
-
-\subsection{\texorpdfstring{\texttt{agents.py}}{agents.py}: intelligence layer}
-
-Is file ko original project ki tarah direct rakha gaya hai:
+\subsection{Button click ke baad exact sequence}
 
 \begin{enumerate}
-  \item Environment variables load karna.
-  \item Gemini main model aur optional Groq critic banana.
-  \item Four prompt templates define karna.
-  \item Har prompt ko \code{prompt | model | StrOutputParser()} chain mein badalna.
-  \item Evidence-bound follow-up answer banana.
+  \item User question, time range, depth, language and sources select karta hai.
+  \item \code{app.py} values ko \code{run\_research\_pipeline()} mein pass karta hai.
+  \item Pipeline Gemini main model aur optional Groq critic banati hai.
+  \item Search Agent question ka short research plan banata hai.
+  \item Question se common words remove karke search query banti hai.
+  \item Selected source functions one-by-one call hote hain.
+  \item Duplicate sources remove hote hain aur \code{S1}, \code{S2} IDs milti hain.
+  \item Reader Agent records compare karke structured notes banata hai.
+  \item Writer Chain notes + exact sources se cited report banati hai.
+  \item Critic Chain completed report ko sources ke against review karti hai.
+  \item Streamlit report, notes, sources, feedback and search plan tabs mein dikhata hai.
 \end{enumerate}
 
-\subsubsection{Simple model setup}
+Why sequential? Har stage ko previous stage ka output chahiye. Sequential flow beginner-friendly, traceable aur interview mein easy to draw hai.
 
-Project mein koi provider routing matrix nahi hai. Gemini Search, Reader aur Writer chalata hai. Groq key ho to Groq Critic chalata hai; key na ho to Gemini Critic bhi chala deta hai. Yeh ek hi simple fallback hai.
+% -----------------------------------------------------------------------------
+\section{File-by-File Explanation}
 
-\begin{lstlisting}[language=Python,caption={Actual model selection idea}]
+\subsection{\texorpdfstring{\texttt{agents.py}}{agents.py}}
+
+Is file mein LLM-related code hai:
+
+\begin{itemize}
+  \item \code{create\_models()} Gemini aur optional Groq banata hai;
+  \item four \code{ChatPromptTemplate} objects roles define karte hain;
+  \item builder functions \code{prompt | model | StrOutputParser()} return karte hain;
+  \item \code{answer\_follow\_up()} collected context ke andar answer deta hai.
+\end{itemize}
+
+\begin{lstlisting}[language=Python,caption={Simple model rule}]
 main_model = ChatGoogleGenerativeAI(...)
 
 if GROQ_API_KEY:
@@ -355,88 +223,41 @@ else:
     critic_model = main_model
 \end{lstlisting}
 
-Why optional second provider? Independent Critic useful hai, but application ko samajhne ke liye complex router zaroori nahi. Interview answer seedha hai: ``Gemini research karta hai; Groq report review karta hai.''
+Google key required hai. Groq optional hai. Koi automatic router ya multiple fallback chain nahi hai.
 
-\subsubsection{Prompt design principles}
+\subsection{\texorpdfstring{\texttt{tools.py}}{tools.py}}
 
-\begin{itemize}
-  \item Role clearly specified.
-  \item Input sections named: request, search plan, evidence, reader notes and report.
-  \item Output structure fixed using Markdown headings.
-  \item Evidence boundary explicit: only \code{[S3]} style supplied IDs cite karo.
-  \item Uncertainty aur insufficient evidence clearly state karo.
-  \item Temperature \code{0.15}: creative prose se zyada stable analytical output.
-\end{itemize}
+Yeh external data laata hai; LLM imagination par retrieval depend nahi karti.
 
-\subsection{\texorpdfstring{\texttt{tools.py}}{tools.py}: live evidence layer}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{.25\textwidth} X}
+\toprule
+Function/source & Responsibility \\
+\midrule
+\code{search\_openalex()} & Recent scholarly papers, authors, venue, DOI, abstract and cited-by count \\
+\code{search\_news()} & Google News RSS se recent reporting \\
+\code{search\_tavily()} & Optional general-web results when key exists \\
+\code{collect\_evidence()} & Selected sources run, errors warn, duplicates remove, IDs assign \\
+\code{format\_evidence()} & Records ko model-readable text banata hai \\
+\code{web\_search()} & Original tutorial-compatible wrapper \\
+\code{scrape\_url()} & Original tutorial-compatible bounded URL reader \\
+\bottomrule
+\end{tabularx}
 
-Yeh file model-independent data acquisition karti hai.
+Each source call ka timeout hai. Ek source fail ho to warning milti hai aur next source continue hota hai.
 
-Video se direct mapping ke liye \code{web\_search(query)} aur \code{scrape\_url(url)} names ab bhi available hain. Deployed pipeline structured cards ke liye richer \code{collect\_evidence()} use karti hai. Iska matlab concept replace nahi hua; original tool ko production data contract mila.
+\subsection{\texorpdfstring{\texttt{pipeline.py}}{pipeline.py}}
 
-\subsubsection{OpenAlex collector}
-
-\begin{itemize}
-  \item Current date minus selected days se \code{from_publication_date} filter banta hai.
-  \item Date window recency guarantee karti hai; window ke andar results relevance score se sort hote hain.
-  \item Title, DOI/landing URL, publication date, venue, authors and cited-by count normalize hote hain.
-  \item OpenAlex abstract inverted index deta hai, jise position-word pairs sort karke normal abstract mein rebuild kiya jata hai.
-\end{itemize}
-
-\begin{lstlisting}[language=Python,caption={Inverted abstract reconstruction concept}]
-words = []
-for word, positions in inverted.items():
-    words.extend((position, word) for position in positions)
-abstract = " ".join(word for _, word in sorted(words))
-\end{lstlisting}
-
-\subsubsection{Google News RSS collector}
-
-Query mein \code{when:Nd} add hota hai. XML response ko \code{ElementTree} parse karta hai. Title, link, date, publisher and description standardized record mein map hote hain. RSS free and convenient hai, lekin link Google redirect ho sakta hai aur snippet full article nahi hota.
-
-\subsubsection{Tavily collector}
-
-\code{TAVILY_API_KEY} present ho tabhi job schedule hoti hai. Yeh general web coverage deta hai. Key absent ho to academic/news pipeline normally chalti rehti hai.
-
-\subsubsection{Straightforward collection}
-
-Search functions ek simple loop mein run hote hain. Har selected source ka function call visible hai, isliye beginner easily debug kar sakta hai.
+Yeh project ka easiest file to explain hona chahiye. Isme:
 
 \begin{itemize}
-  \item Ek source fail ho to baaki evidence retain hota hai.
-  \item Error short warning mein convert hota hai.
-  \item Trade-off: parallel version se thodi zyada latency ho sakti hai, lekin code ka learning cost kam hai.
+  \item normal function arguments user configuration receive karte hain;
+  \item ek plain \code{state} dictionary intermediate output store karti hai;
+  \item four stages visible order mein call hote hain;
+  \item optional callback UI progress update karta hai;
+  \item \code{export\_markdown()} downloadable report banata hai.
 \end{itemize}
 
-\subsubsection{Cleaning, deduplication and IDs}
-
-HTML tags and repeated whitespace remove hote hain. Summary 500 characters tak bounded hai. URL otherwise title identity se duplicates remove hote hain. Final records ko deterministic run-local IDs \code{S1}, \code{S2}, ... milte hain.
-
-\subsection{\texorpdfstring{\texttt{pipeline.py}}{pipeline.py}: orchestration layer}
-
-\subsubsection{Simple function arguments}
-
-Dataclass aur request adapters remove kar diye gaye. Main function seedhe topic aur optional form values leta hai:
-\begin{center}
-\code{run\_research\_pipeline(topic)}
-\end{center}
-Time range, domain, language aur source toggles normal keyword arguments hain. Yeh original video ke call ke sabse close hai.
-
-\subsubsection{Query normalization}
-
-Natural question OpenAlex ko over-constrain kar sakta tha. \code{_build_search_query()} punctuation and common question/recency stopwords remove karta hai, duplicate terms hataata hai, important short token \code{ai} preserve karta hai, aur query ko first 12 terms tak limit karta hai.
-
-Example:
-
-\begin{center}
-\code{What are recent advances in small language models for on-device AI?}\\
-\(\Downarrow\)\\
-\code{small language models device ai}
-\end{center}
-
-\subsubsection{Shared state}
-
-Pipeline ek dictionary mein inspectable artifacts rakhti hai:
+Important state:
 
 \begin{lstlisting}[language=Python]
 state = {
@@ -445,735 +266,242 @@ state = {
     "search_plan": "...",
     "search_results": "...",
     "evidence": [...],
-    "scraped_content": "...",
+    "scraped_content": "...",  # Reader notes
     "report": "...",
     "feedback": "..."
 }
 \end{lstlisting}
 
-This is useful for UI tabs, debugging, export and future persistence.
+\subsection{\texorpdfstring{\texttt{app.py}}{app.py}}
 
-\subsubsection{Progress callback}
-
-Pipeline Streamlit import nahi karti. Instead optional callback ko \code{step, status} deti hai. Is dependency inversion se core pipeline CLI/test mein bhi run hoti hai, aur UI apna progress visualization decide karti hai.
-
-\subsection{\texorpdfstring{\texttt{app.py}}{app.py}: presentation and interaction layer}
-
-Responsibilities:
+Streamlit UI responsibilities:
 
 \begin{itemize}
-  \item Page config and responsive CSS.
-  \item Local env plus Streamlit Cloud secrets bridge.
-  \item Example questions and compact research form.
-  \item Advanced domain/region/audience/source settings.
-  \item Four-stage progress bar without duplicate log rows.
-  \item Report, Reader notes, Sources, Critic feedback and Search plan tabs.
-  \item Evidence cards with safe HTML escaping and validated link schemes.
-  \item Report download and evidence-bound follow-up chat.
-  \item Session state for result and conversation continuity.
+  \item local \code{.env} aur Streamlit Cloud secrets support;
+  \item question form and optional settings;
+  \item four-stage progress display;
+  \item report/notes/sources/feedback/search-plan tabs;
+  \item source cards and original links;
+  \item Markdown download;
+  \item result and follow-ups ko \code{st.session\_state} mein preserve karna.
 \end{itemize}
 
-\subsubsection{Why session state?}
-
-Streamlit every interaction par script top-to-bottom rerun karta hai. Without \code{st.session_state}, generated report aur follow-up history lost ho jati. Result and messages session state mein store hone se reruns ke across survive karte hain.
-
-\subsubsection{Cloud secrets bridge}
-
-Local code \code{os.getenv()} use karta hai, jabki Streamlit Cloud credentials \code{st.secrets} mein deta hai. App startup selected secret names ko environment mein \code{setdefault} karta hai. Local environment priority retain hoti hai; cloud par same backend code reuse hota hai.
-
-\subsection{Supporting files}
-
-\begin{longtable}{p{.31\textwidth} p{.59\textwidth}}
-\toprule
-File & Purpose \\
-\midrule
-\file{requirements.txt} & Streamlit, LangChain provider integrations, dotenv and requests with version ranges. \\
-\file{.env.example} & Safe configuration template; real keys absent. \\
-\file{.gitignore} & Real \code{.env}, virtualenv, cache and local Streamlit secrets exclude karta hai. \\
-\file{.streamlit/config.toml} & Light theme, server security flags and usage telemetry preference. \\
-\file{.streamlit/secrets.toml.example} & Cloud/local TOML secret format example. \\
-\file{Dockerfile} & Python 3.12 slim image, dependency layer, port 8501, health check, Streamlit command. \\
-\file{.dockerignore} & Secrets, Git metadata, venv and cache image context se exclude karta hai. \\
-\file{runtime.txt} & Cloud Python version intent. \\
-\file{README.md} & Product summary, workflow and local run instructions. \\
-\file{DEPLOYMENT.md} & Streamlit Cloud and Docker deployment steps. \\
-\bottomrule
-\end{longtable}
-
 % -----------------------------------------------------------------------------
-\section{Tutorial Ke Four Stages: Role, Input, Output, Upgrade}
+\section{Four Stages Ko Detail Mein Explain Karein}
 
 \subsection{1. Search Agent}
 
-\textbf{Input:} complete research profile.\\
-\textbf{Output:} search objective, sub-questions, evidence criteria, blind spots, normalized query and live records.\\
-\textbf{Tutorial connection:} original Search Agent Tavily tool call karta tha. Upgraded stage same responsibility rakhti hai, lekin OpenAlex + Google News + optional Tavily use karti hai aur structured \code{[Sx]} IDs deti hai.
+LLM pehle question ko scope karta hai: kya search karna hai, sub-questions kya hain aur blind spots kya ho sakte hain. Uske baad pipeline deterministic source functions call karti hai.
+
+\textbf{Important honesty:} current Search Agent unrestricted autonomous tool-calling agent nahi hai. Yeh controlled prompt chain + explicit search functions ka stage hai. Isse behaviour predictable rehta hai.
 
 \subsection{2. Reader Agent}
 
-\textbf{Input:} Search plan + all retrieved records.\\
-\textbf{Output:} established findings, emerging signals, disagreements, limitations and evidence gaps.\\
-\textbf{Tutorial connection:} original Reader ek selected URL scrape karta tha. Production version saare bounded abstracts/snippets compare karta hai, kyunki one-page selection brittle aur biased ho sakta hai. Original \code{scrape\_url()} helper learning compatibility ke liye available hai.
+Original Reader ek URL read karta tha. Current Reader multiple records compare karta hai. Output mein important findings, emerging signals, disagreements aur missing evidence hota hai. Source text ko data treat karne aur embedded instructions ignore karne ka prompt hai.
 
 \subsection{3. Writer Chain}
 
-\textbf{Input:} request profile + Reader notes + exact source records.\\
-\textbf{Output:} audience-specific cited report with key findings, trends, uncertainty, implications and method note.\\
-\textbf{Tutorial connection:} same LangChain composition---\code{prompt | llm | StrOutputParser()}---use hoti hai; prompt ko evidence IDs aur uncertainty rules se strengthen kiya gaya.
+Reader notes aur exact source records receive karke report banati hai. Prompt ke main rules:
+
+\begin{itemize}
+  \item factual claims ke paas \code{[Sx]} citation;
+  \item source/statistic invent nahi karna;
+  \item weak evidence par uncertainty show karna;
+  \item requested language and audience follow karna.
+\end{itemize}
 
 \subsection{4. Critic Chain}
 
-\textbf{Input:} completed report + exact source records.\\
-\textbf{Output:} score, strengths, claims to improve, missing/conflicting evidence and one-line verdict.\\
-\textbf{Checks:} unsupported citations, selection bias, duplicate reporting, correlation vs causation, date/geography mismatch and overconfidence. Dono keys ho to Critic independent provider use karta hai.
+Completed report aur sources receive karti hai. Score, strengths, improvements and verdict return karti hai. Groq available ho to independent model review milta hai; otherwise Gemini review karta hai.
 
-\begin{keybox}[Important honest limitation]
-Tutorial order preserve karne ke liye Critic completed report ke baad feedback deta hai. Current report automatically rewrite nahi hoti. Future optional revision loop Critic feedback ko Writer mein wapas bhej sakta hai, lekin tab workflow tutorial ke simple four-stage path se aage badhega.
+Current Critic feedback report ko automatically rewrite nahi karti. Yeh visible review hai. Revision loop future improvement hai.
+
+% -----------------------------------------------------------------------------
+\section{Sources, Citations and Hallucination Control}
+
+Har evidence record roughly yeh structure rakhta hai:
+
+\begin{lstlisting}[language=Python]
+{
+    "id": "S1",
+    "kind": "Academic",
+    "title": "...",
+    "url": "https://...",
+    "published": "2026-...",
+    "publisher": "...",
+    "summary": "..."
+}
+\end{lstlisting}
+
+Hallucination reduce karne ke methods:
+
+\begin{itemize}
+  \item live sources model context mein diye jate hain;
+  \item report sirf existing \code{[Sx]} IDs cite karne ko kehti hai;
+  \item temperature \code{0.15} rakha hai;
+  \item snippets bounded hain, so context predictable hai;
+  \item Critic unsupported/overconfident claims check karta hai;
+  \item UI original source link show karti hai.
+\end{itemize}
+
+\begin{keybox}[Honest limitation]
+Source ID valid hona yeh guarantee nahi karta ki source claim ko logically support bhi karta hai. Automated claim--citation entailment checker abhi nahi hai. High-stakes claims human ko original source se verify karne chahiye.
 \end{keybox}
 
-% -----------------------------------------------------------------------------
-\section{Complete Runtime Flow: Button Click Se Report Tak}
-
-\begin{enumerate}
-  \item User form fill karke \textbf{Start research} click karta hai.
-  \item App empty question and empty source selection validate karti hai.
-  \item UI values direct pipeline function arguments bante hain.
-  \item Pipeline Gemini main model aur optional Groq critic banati hai.
-  \item Search Agent question ko scope karta hai aur plan banata hai.
-  \item Natural question keyword query mein normalize hoti hai.
-  \item Search stage selected source functions one-by-one call karti hai.
-  \item Records clean, deduplicate and source-ID assign hote hain.
-  \item Reader Agent saare bounded records compare karke research notes banata hai.
-  \item Writer Chain notes + evidence se cited report banati hai.
-  \item Critic Chain, preferably another provider, completed report stress-test karti hai.
-  \item UI state ko metrics and five result tabs mein render karti hai.
-  \item Export full report + source library + audit trail combine karta hai.
-  \item Follow-up chat same evidence boundary ke andar answer karti hai.
-\end{enumerate}
-
-\subsection{Depth ka effect}
-
-\begin{center}
-\begin{tabular}{lcc}
-\toprule
-Depth & Per selected source limit & Research model \\
-\midrule
-Quick scan & 4 & Gemini \\
-Standard & 6 & Gemini \\
-Deep dive & 8 & Gemini \\
-\bottomrule
-\end{tabular}
-\end{center}
-
-If academic + news selected hain, Standard roughly up to 12 raw records la sakta hai before deduplication.
+Isse vector-database RAG mat bolo. Better term: \textbf{live retrieval-augmented research pipeline}, kyunki APIs/RSS se evidence run-time par retrieve hota hai; embeddings/vector store use nahi hote.
 
 % -----------------------------------------------------------------------------
-\section{Evidence, Citations and Hallucination Control}
+\section{Important Decisions and Problems Solved}
 
-\subsection{Is project RAG hai?}
+\subsection{Why Gemini + Groq?}
 
-Strict textbook vector-RAG nahi hai because embeddings, chunk index aur vector database use nahi ho rahe. Yeh \textbf{live retrieval-augmented research pipeline} hai: external evidence retrieve hota hai, prompt context mein inject hota hai, aur grounded synthesis hoti hai.
+Gemini main research flow handle karta hai. Groq optional independent Critic hai. Fixed rule automatic router se easier to understand hai. Second model correctness guarantee nahi karta, but different review perspective deta hai.
 
-\interview{It is retrieval-augmented generation, but not vector-store RAG. Retrieval is live and API-based rather than embedding-based.}
+\subsection{Groq 413 request-too-large error}
 
-\subsection{Stable citation IDs}
+Problem: report + evidence + output budget provider limit cross kar rahe the.
 
-Har run mein evidence record ko \code{S1}, \code{S2} ID milta hai. Prompts model ko only supplied IDs cite karne bolte hain. UI evidence library mein same ID show hoti hai. Isse user claim se source card tak trace kar sakta hai.
-
-\subsection{What this guarantees -- and what it does not}
-
-\textbf{Improves:}
+Simple fix:
 
 \begin{itemize}
-  \item traceability;
-  \item invented URLs reduce karna;
-  \item missing evidence explicitly show karna;
-  \item claims ko review karna.
+  \item per-source summaries 500 characters tak;
+  \item Quick/Standard/Deep source limits 4/6/8;
+  \item Reader, Writer and Critic inputs par direct string limits;
+  \item maximum output tokens environment variable se controlled.
 \end{itemize}
 
-\textbf{Does not guarantee:}
+\subsection{PEP 668 installation error}
 
-\begin{itemize}
-  \item source itself correct hai;
-  \item model ne source ko perfectly interpret kiya;
-  \item every citation semantically entails the full sentence;
-  \item search coverage exhaustive hai.
-\end{itemize}
-
-Future production version mein citation entailment checker, source quality scoring and full-text verification add karna chahiye.
-
-\subsection{Prompt injection defense}
-
-Retrieved snippets untrusted hain. System prompt explicitly bolta hai: evidence ke andar commands ko ignore karo, unhe instructions nahi data treat karo. UI external text ko HTML render karne se pehle \code{html.escape()} karti hai. Link only \code{http://} or \code{https://} scheme par button banta hai.
-
-% -----------------------------------------------------------------------------
-\section{Most Important Problems Faced and Fixes}
-
-\subsection{Problem 1: Groq HTTP 413 / 8K token request}
-
-\textbf{Symptom:} review stage ne approximately 8319 tokens request kiye, account limit 8000 thi.\\
-\textbf{Root cause:} report + evidence + prompts ka combined context too large tha.\\
-\textbf{Fixes:}
-
-\begin{itemize}
-  \item Groq default large model se lower-throughput-friendly model par shift.
-  \item Output tokens 1400 cap.
-  \item Per-source excerpt 500 chars.
-  \item Quick/Standard/Deep source limits reduce.
-  \item Direct string slices before Reader, Writer and Critic calls.
-\end{itemize}
-
-\textbf{Verification:} Standard pipeline live sources aur all four tutorial-aligned stages ke saath successfully run hui.
-
-\begin{answerbox}
-\textbf{STAR version:} Situation -- production-like run Critic stage par 413 se fail hua. Task -- request ko provider limit ke andar lana. Action -- source count, excerpt size, prompt input and output size directly cap ki. Result -- same four-stage flow smaller predictable context ke saath run hui.
-\end{answerbox}
-
-\subsection{Problem 2: OpenAlex relevance weak thi}
-
-\textbf{Symptom:} long natural-language question par zero ya tangential papers.\\
-\textbf{Fix:} keyword normalization, date filter + relevance sorting.\\
-\textbf{Lesson:} user query and retrieval query same cheez nahi hote.
-
-\subsection{Problem 3: Python externally-managed environment}
-
-System pip ne PEP 668 error diya. Fix project-local virtual environment:
+System Python par pip install block hua. Correct solution project virtual environment tha:
 
 \begin{lstlisting}[language=bash]
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m streamlit run app.py
+source .venv/bin/activate
+pip install -r requirements.txt
+streamlit run app.py
 \end{lstlisting}
 
-\subsection{Problem 4: Streamlit Secrets invalid TOML}
+\subsection{Secrets and deployment}
 
-Model name slash/hyphen string without quotes invalid TOML tha.
+Local development \code{.env} use karti hai. Streamlit Cloud TOML secrets use karta hai. Required/optional configuration:
 
 \begin{lstlisting}
-# Wrong
-GROQ_MODEL=openai/gpt-oss-20b
-
-# Correct
-GROQ_MODEL = "openai/gpt-oss-20b"
-\end{lstlisting}
-
-\subsection{Problem 5: Deprecated provider model}
-
-Hardcoded model IDs time ke saath retire ho sakte hain. Isliye model names environment variables mein configurable rakhe gaye. Interview mein exact model se zyada important point hai ki model name source code edit kiye bina change ho sakta hai.
-
-\subsection{Problem 6: Git remote and non-fast-forward push}
-
-Original clone another repository ko point karta tha. Remote user repository par switch hua. Later GitHub ne Dev Container commit add kiya, isliye push reject hua. Safe response: remote fetch, inspect, rebase, then normal push. Force push avoid hua.
-
-% -----------------------------------------------------------------------------
-\section{Security and Responsible Engineering}
-
-\subsection{Secrets management}
-
-\begin{itemize}
-  \item Real \code{.env} Git ignored hai.
-  \item Cloud secrets hosting dashboard mein encrypted config ke through set hote hain.
-  \item \code{.env.example} only placeholders rakhta hai.
-  \item Docker build context real env and secrets exclude karta hai.
-  \item Exposed API key ko immediately revoke/rotate karna chahiye.
-\end{itemize}
-
-\subsection{Network safety and resilience}
-
-\begin{itemize}
-  \item OpenAlex/news timeout 18 seconds; Tavily 22 seconds.
-  \item \code{raise_for_status()} HTTP failure silently ignore nahi karta.
-  \item Expected errors per-source warnings bante hain.
-  \item User-Agent identify karta hai ki call local research assistant se hai.
-\end{itemize}
-
-\subsection{Input/output safety}
-
-\begin{itemize}
-  \item External titles/snippets HTML-escaped.
-  \item Source links scheme-checked.
-  \item Prompt evidence treated as untrusted.
-  \item High-stakes findings primary sources se verify karne ka disclaimer.
-  \item No claim that model output is guaranteed truth.
-\end{itemize}
-
-\subsection{Production gaps}
-
-SSRF risk low hai because current collectors fixed endpoints use karte hain, but future arbitrary URL scraping add ho to private IP ranges, redirects, content type and response size validate karne honge. Public multi-user app ke liye authentication, quotas, abuse controls and per-user isolation add karni hogi.
-
-% -----------------------------------------------------------------------------
-\section{Testing and Verification Strategy}
-
-Project development mein following checks use hue:
-
-\begin{longtable}{p{.30\textwidth} p{.60\textwidth}}
-\toprule
-Test & Purpose \\
-\midrule
-\code{python -m py_compile} & Syntax errors across app, agents, pipeline and tools. \\
-Utility assertions & Cleaning, query normalization, evidence formatting and export IDs. \\
-Provider construction & Correct model and max token configuration without full run. \\
-Live OpenAlex/news test & External collectors returned structured source records. \\
-Single agent call & Provider SDK + prompt chain integration. \\
-Full Standard pipeline & All agent stages and export with live evidence. \\
-Streamlit health endpoint & Server process bound and served health route. \\
-Streamlit AppTest & App rendered with zero exceptions; widgets detectable. \\
-\code{git diff --check} & Whitespace/patch hygiene. \\
-\bottomrule
-\end{longtable}
-
-\subsection{What automated tests should be added next?}
-
-\begin{enumerate}
-  \item Mock requests for OpenAlex, RSS and Tavily response parsing.
-  \item Query normalizer parameterized tests.
-  \item Gemini/Groq model creation tests.
-  \item Pipeline tests with mocked agents and collector failures.
-  \item Citation validator: every \code{[Sx]} in report exists in evidence.
-  \item Prompt-injection regression cases.
-  \item Snapshot tests for exported Markdown sections.
-  \item LLM eval dataset for correctness, coverage, calibration and citation support.
-\end{enumerate}
-
-% -----------------------------------------------------------------------------
-\section{Deployment: Local Se Production Tak}
-
-\subsection{Local}
-
-\begin{lstlisting}[language=bash]
-git clone https://github.com/Kaushik9560/Research-Mind.git
-cd Research-Mind
-python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements.txt
-.venv/bin/python -m streamlit run app.py
-\end{lstlisting}
-
-\subsection{Streamlit Community Cloud}
-
-\begin{enumerate}
-  \item GitHub repo and \code{main} branch choose karo.
-  \item Entrypoint \code{app.py} set karo.
-  \item Python 3.12 select karo.
-  \item Secrets TOML mein rotated keys and model names add karo.
-  \item Deploy; later Git push automatic redeploy trigger karega.
-\end{enumerate}
-
-\begin{lstlisting}
-GROQ_API_KEY = "rotated-key"
-GROQ_MODEL = "openai/gpt-oss-20b"
-GOOGLE_API_KEY = "rotated-key"
+GOOGLE_API_KEY = "..."       # required
 GOOGLE_MODEL = "gemini-3.6-flash"
+GROQ_API_KEY = "..."         # optional critic
+GROQ_MODEL = "openai/gpt-oss-20b"
+TAVILY_API_KEY = "..."       # optional web search
 MAX_OUTPUT_TOKENS = 1400
 \end{lstlisting}
 
-\subsection{Docker}
-
-Dockerfile dependency installation ko source copy se pehle karta hai, so dependency layer cache ho sakti hai. Container port 8501 expose karta hai aur \code{/_stcore/health} health check use karta hai.
-
-\begin{lstlisting}[language=bash]
-docker build -t insightforge .
-docker run --rm -p 8501:8501 --env-file .env insightforge
-\end{lstlisting}
-
-\subsection{Scaling beyond single-process Streamlit}
-
-Current pipeline synchronous hai. Long research ya many users ke liye:
-
-\begin{itemize}
-  \item FastAPI API layer;
-  \item Celery/RQ or managed queue;
-  \item Redis job status/cache;
-  \item PostgreSQL research sessions;
-  \item object storage for exports;
-  \item background workers and WebSocket/SSE progress;
-  \item rate limiting and auth.
-\end{itemize}
+Real keys Git mein commit nahi honi chahiye. Exposed key ko revoke/rotate karna chahiye.
 
 % -----------------------------------------------------------------------------
-\section{Design Decisions and Trade-offs}
+\section{Most Likely Interview Questions}
 
-\begin{longtable}{p{.25\textwidth} p{.32\textwidth} p{.33\textwidth}}
-\toprule
-Decision & Benefit & Trade-off \\
-\midrule
-Live APIs instead of vector DB & Fresh trends, no indexing pipeline & Coverage depends on upstream search and snippets. \\
-Sequential agents & Clear dependencies and audit trail & Multiple LLM calls increase latency/cost. \\
-Optional Groq review & More independent critique when configured & Second key is optional. \\
-RSS for news & No extra paid API key & Redirect links, snippet-only content, locale bias. \\
-Streamlit & Very fast product UI & Less control than React/FastAPI architecture. \\
-Sequential source calls & Easy to read and debug & Slower than parallel I/O. \\
-Markdown output & Easy render/export & Structured downstream analytics harder than strict JSON. \\
-Direct string limits & Simple context-size guard & Character count is not exact token count. \\
-Run-local IDs & Simple traceability & IDs do not persist across repeated runs. \\
-Low temperature & Stable analytical answers & Less diversity in phrasing/exploration. \\
-\bottomrule
-\end{longtable}
-
-\subsection{Complexity intuition}
-
-Let \(S\) be number of selected source collectors and \(N\) total returned records.
-
-\begin{itemize}
-  \item Source wall time is approximately \(O(T_1+\cdots+T_S)\) because calls are sequential.
-  \item Deduplication is expected \(O(N)\) using a set.
-  \item Abstract reconstruction is \(O(W\log W)\) due to sorting word positions.
-  \item LLM latency dominates end-to-end runtime because four model stages are sequential.
-\end{itemize}
-
-% -----------------------------------------------------------------------------
-\section{Interview Questions and Model Answers}
-
-\subsection{Core architecture}
-
-\textbf{Q1. Why did you use multiple agents instead of one large prompt?}
+\textbf{Q1. Why multi-agent instead of one prompt?}
 \begin{answerbox}
-I preserved the tutorial's separation of concerns: Search plans and retrieves, Reader compares evidence, Writer communicates, and Critic audits. Intermediate artifacts are inspectable and testable. The trade-off is added latency and token cost compared with one prompt.
+Search planning, evidence reading, report writing and quality review different responsibilities hain. Four outputs inspect kiye ja sakte hain, aur flow tutorial se naturally map hota hai. Trade-off: extra latency and model calls.
 \end{answerbox}
 
-\textbf{Q2. Are these autonomous agents?}
+\textbf{Q2. Are these fully autonomous agents?}
 \begin{answerbox}
-They are specialized LLM-powered stages in a controlled orchestration, not fully autonomous agents with unrestricted planning. I deliberately kept the workflow bounded for reliability and auditability.
+No. They are bounded role-based LLM stages in a controlled pipeline. Search tools explicitly Python pipeline call karti hai. I chose predictability and explainability over unrestricted autonomy.
 \end{answerbox}
 
-\textbf{Q3. Why are live source calls deterministic even though it is called Search Agent?}
+\textbf{Q3. Why does Reader use snippets instead of full articles?}
 \begin{answerbox}
-The Search stage combines an LLM search plan with deterministic HTTP/API tools. Retrieval itself should be observable and reproducible; the model handles semantic scoping, not fabrication of search results.
+Full scraping introduces paywalls, robots rules, copyright, parsing and latency issues. Abstracts and snippets are a safe baseline. Future version official full-text/open-access APIs use kar sakti hai.
 \end{answerbox}
 
-\textbf{Q4. How does data move between agents?}
+\textbf{Q4. Why OpenAlex?}
 \begin{answerbox}
-A normal dictionary stores request data and each stage's output. Every stage reads the previous key and adds its own key.
+It provides scholarly metadata, dates, authors, DOI links, venues, cited-by counts and many abstracts without requiring an API key.
 \end{answerbox}
 
-\textbf{Q5. Why not run all agents in parallel?}
+\textbf{Q5. Why is Tavily optional?}
 \begin{answerbox}
-Each stage needs the previous result. I also kept source calls sequential because this is a learning-focused project; the small latency trade-off makes the code much easier to explain and debug.
+Academic and news research should work without a paid search key. Tavily adds broader web coverage only when configured.
 \end{answerbox}
 
-\subsection{Retrieval and evidence}
-
-\textbf{Q6. Why OpenAlex?}
+\textbf{Q6. How do citations work?}
 \begin{answerbox}
-It provides broad scholarly metadata, search, dates, authors, venues, DOI links, cited-by counts and many abstracts through an accessible API. It is a strong zero-key academic baseline.
+Collector real records ko S1, S2 IDs deta hai. Writer receives those exact records and uses IDs inline. UI/export same IDs ko source URLs se map karte hain.
 \end{answerbox}
 
-\textbf{Q7. Does citation count prove paper quality?}
+\textbf{Q7. What if a source fails?}
 \begin{answerbox}
-No. It is age- and field-dependent and can be gamed. The prompt explicitly prevents using citation count alone as quality proof.
+Each source call has simple error handling. Failure warning ban jati hai and remaining selected sources continue.
 \end{answerbox}
 
-\textbf{Q8. How do you identify latest trends?}
+\textbf{Q8. Why are calls sequential?}
 \begin{answerbox}
-First constrain a time window, then examine repeated signals across independent sources, research activity, adoption, policy/market drivers and counter-signals. Recency alone is not called a trend.
+This is a learning and interview project with only a few sources. Sequential code is easier to trace and debug. Parallel I/O can be added later if measured latency requires it.
 \end{answerbox}
 
-\textbf{Q9. How do you ensure citations are real?}
+\textbf{Q9. Why Gemini for research and Groq for Critic?}
 \begin{answerbox}
-URLs and IDs originate from collector records, and prompts may cite only supplied IDs. A remaining improvement is automated entailment validation for every claim-citation pair.
+Gemini is the fixed main model and Groq gives an optional independent review. The rule is explicit and simple; I removed unnecessary automatic routing.
 \end{answerbox}
 
-\textbf{Q10. Why not scrape full articles?}
+\textbf{Q10. Biggest limitation?}
 \begin{answerbox}
-Full-text scraping creates robots, paywall, copyright, latency, parsing and security issues. Metadata/snippets are a safe baseline. Future full-text access should prefer official APIs and licensed/open-access content.
+The system relies mainly on metadata/snippets and does not automatically verify that every citation entails its claim. Evidence quality and deterministic citation checking are the first improvements.
 \end{answerbox}
 
-\textbf{Q11. What happens if one source fails?}
+\textbf{Q11. Why Streamlit?}
 \begin{answerbox}
-Each source call has a small try/except. A failed API becomes a warning and the next selected source still runs.
+It lets a Python project ship forms, progress, tabs, chat and downloads quickly. For a larger multi-user product I would separate a FastAPI backend and React frontend.
 \end{answerbox}
 
-\subsection{LLMs and prompting}
-
-\textbf{Q12. Why temperature 0.15?}
+\textbf{Q12. How would you scale it?}
 \begin{answerbox}
-Research synthesis benefits from consistency and lower variation. It is not zero because some flexible organization is useful, but factual grounding matters more than creativity.
-\end{answerbox}
-
-\textbf{Q13. Why Gemini plus Groq?}
-\begin{answerbox}
-Gemini handles Search, Reader and Writer. Groq handles the Critic so the report can be reviewed by a different model. This is a fixed, easy-to-explain rule rather than automatic routing.
-\end{answerbox}
-
-\textbf{Q14. What if one API key is absent?}
-\begin{answerbox}
-Google key is required because Gemini runs the research stages. Groq is optional; without it Gemini also runs the Critic. There are no additional provider fallbacks.
-\end{answerbox}
-
-\textbf{Q15. How do you control hallucination?}
-\begin{answerbox}
-Live evidence, stable source IDs, explicit evidence rules, low temperature, uncertainty instructions, and an independent Critic that audits the completed report. I still communicate that this reduces but cannot eliminate hallucination.
-\end{answerbox}
-
-\textbf{Q16. What is prompt injection here?}
-\begin{answerbox}
-A retrieved snippet might contain text instructing the model to ignore system rules. The agent prompt labels evidence as untrusted data and tells the model to ignore instructions inside it. Production hardening can add content classifiers and stricter structured extraction.
-\end{answerbox}
-
-\textbf{Q17. Why use LangChain?}
-\begin{answerbox}
-It gives a consistent provider interface and composable prompt-model-parser pipeline. Business orchestration remains ordinary Python, so lock-in is limited.
-\end{answerbox}
-
-\textbf{Q18. How did you manage context limits?}
-\begin{answerbox}
-Bounded record counts, 500-character excerpts, direct string slices before each model call, and a maximum output-token setting.
-\end{answerbox}
-
-\subsection{Python and backend}
-
-\textbf{Q19. Why normal function arguments instead of a request class?}
-\begin{answerbox}
-The project is small and interview-focused. Explicit function arguments keep the main pipeline call close to the tutorial and avoid introducing a class that adds little value here.
-\end{answerbox}
-
-\textbf{Q20. Why are source calls sequential?}
-\begin{answerbox}
-The application calls only two or three sources. Sequential requests make control flow obvious. If latency becomes important, parallel I/O is a measured future optimization.
-\end{answerbox}
-
-\textbf{Q21. Why did you remove automatic provider routing and client caching?}
-\begin{answerbox}
-They made a small learning project harder to explain. A fixed Gemini-research/Groq-critic rule is enough. I would add caching or routing only after profiling a real production workload.
-\end{answerbox}
-
-\textbf{Q22. Why expected exceptions only in collectors?}
-\begin{answerbox}
-Network and parse failures are recoverable. Catching every exception would hide programming defects such as KeyError or schema bugs, making production debugging harder.
-\end{answerbox}
-
-\textbf{Q23. How does deduplication work?}
-\begin{answerbox}
-It uses normalized URL, falling back to title, as identity in a set. This is O(N) expected time, but semantic duplicate stories with different URLs remain a future improvement.
-\end{answerbox}
-
-\subsection{Frontend and deployment}
-
-\textbf{Q24. Why Streamlit?}
-\begin{answerbox}
-It let me ship a Python-native research product quickly with forms, status, tabs, chat and download. If product complexity grows, I would separate FastAPI backend and a React frontend.
-\end{answerbox}
-
-\textbf{Q25. How does state survive Streamlit reruns?}
-\begin{answerbox}
-Generated output and follow-up messages live in st.session\_state. Without it every widget interaction would reconstruct an empty screen.
-\end{answerbox}
-
-\textbf{Q26. How are secrets different locally and in cloud?}
-\begin{answerbox}
-Local development loads .env; Streamlit Cloud provides st.secrets. Startup bridges approved secret names into environment variables, so backend provider code stays unchanged.
-\end{answerbox}
-
-\textbf{Q27. Why Docker health check?}
-\begin{answerbox}
-It lets an orchestrator distinguish a running process from a ready Streamlit service and restart unhealthy containers.
-\end{answerbox}
-
-\textbf{Q28. What caused the externally managed environment error?}
-\begin{answerbox}
-PEP 668 prevents pip from mutating the distribution-managed Python environment. A project virtual environment is the safe solution; bypass flags can break system packages.
-\end{answerbox}
-
-\subsection{Critical thinking}
-
-\textbf{Q29. What is the biggest current limitation?}
-\begin{answerbox}
-Evidence coverage and verification depth. The system mostly uses metadata/snippets, and model citations are not automatically checked for entailment. That is the first area I would strengthen.
-\end{answerbox}
-
-\textbf{Q30. How would you measure quality?}
-\begin{answerbox}
-Build a benchmark of research questions with expert-labeled claims and sources. Track source precision/recall, citation validity, claim support, contradiction coverage, calibration, latency and cost.
-\end{answerbox}
-
-\textbf{Q31. How would you reduce cost?}
-\begin{answerbox}
-Cache retrieval, hash and reuse identical evidence, route quick scans to cheaper models, reduce repeated context, summarize evidence once, batch evals, and enforce per-user quotas.
-\end{answerbox}
-
-\textbf{Q32. How would you improve search?}
-\begin{answerbox}
-Generate multiple structured subqueries from the Search Agent plan, search each, rerank with a cross-encoder, diversify by source/domain/date, and stop when evidence saturation is reached.
-\end{answerbox}
-
-\textbf{Q33. Is an LLM critic actually reliable?}
-\begin{answerbox}
-It is a heuristic reviewer, not a proof system. Cross-provider critique improves diversity, but deterministic citation checks and human review remain necessary for high-stakes research.
-\end{answerbox}
-
-\textbf{Q34. What happens under many simultaneous users?}
-\begin{answerbox}
-Provider quotas and synchronous worker capacity become bottlenecks. I would move jobs to a queue, persist state, stream progress, add caching, rate limits and per-user quotas.
-\end{answerbox}
-
-\textbf{Q35. Why is this a real-world project rather than a demo?}
-\begin{answerbox}
-It integrates live sources, evidence traceability, failure handling, token budgeting, independent review, secure configuration, responsive UI, exports, deployment and explicit limitations--not only a single prompt call.
+Add background jobs, persistent research sessions, caching, rate limits, authentication and async/parallel source requests. I would add these only when real usage justifies the complexity.
 \end{answerbox}
 
 % -----------------------------------------------------------------------------
-\section{Two-Minute Demo Script}
+\section{Two-Minute Demo and Final Revision}
 
-Interview demo mein random clicking avoid karo. Yeh sequence follow karo:
+\subsection{Demo order}
 
 \begin{enumerate}
-  \item \textbf{Problem (15 sec):} ``Search gives links, chatbot gives unverified prose; this product joins live evidence with structured critique.''
-  \item \textbf{Input (15 sec):} Example select karo; 1 year, Standard, English. More options mein sources show karo.
-  \item \textbf{Stages (20 sec):} Four tutorial-aligned cards explain karo. Start research press karo and progress bar point out karo.
-  \item \textbf{Brief (25 sec):} Executive answer and inline \code{[Sx]} citations show karo.
-  \item \textbf{Evidence (20 sec):} Same IDs, publication dates and original source links show karo.
-  \item \textbf{Critical review (15 sec):} Weak claims and missing evidence show karo.
-  \item \textbf{Models (15 sec):} simple rule explain karo---Gemini research, Groq review.
-  \item \textbf{Close (10 sec):} Export and follow-up question demonstrate karo.
+  \item Problem bolo: search gives links, chatbot can give unsupported prose.
+  \item Ek focused example question select karo.
+  \item Four UI cards explain karo.
+  \item Research start karke progress sequence show karo.
+  \item Report mein \code{[Sx]} citations point out karo.
+  \item Sources tab mein same IDs and original URLs show karo.
+  \item Critic feedback and score show karo.
+  \item Search plan/Reader notes se pipeline transparency show karo.
+  \item Download and one follow-up question demonstrate karo.
 \end{enumerate}
 
-\begin{keybox}[Demo safety]
-Live APIs unpredictable hote hain. Interview se pehle ek successful result ready rakho. Agar network fail ho, architecture and graceful warning demonstrate karo instead of hiding the limitation.
-\end{keybox}
-
-% -----------------------------------------------------------------------------
-\section{Resume Bullets and STAR Stories}
-
-\subsection{Resume bullets}
-
-\begin{itemize}
-  \item Built and deployed an evidence-first multi-agent research platform that synthesizes recent scholarly and news sources into citation-mapped trend reports.
-  \item Upgraded a tutorial-based four-stage Search--Reader--Writer--Critic workflow with live evidence, source IDs, and optional cross-provider review.
-  \item Used Gemini for research and an optional Groq critic, keeping model selection explicit and easy to maintain.
-  \item Improved source reliability with timeouts, simple per-source error handling, deduplication, and stable source IDs.
-  \item Shipped a responsive Streamlit UI with evidence library, progress tracking, follow-up Q\&A, Markdown export, Docker health checks, and cloud secrets support.
-\end{itemize}
-
-\subsection{STAR story: product evolution}
-
-\textbf{Situation:} Existing project was a generic search/scrape/write/critic demo.\\
-\textbf{Task:} Convert it into a useful, domain-agnostic research product.\\
-\textbf{Action:} Reframed requirements around evidence, trends, counter-signals, traceability and deployment; refactored tools, agents, orchestration and UI.\\
-\textbf{Result:} A deployable system for researchers, students and decision makers with live sources and auditable outputs.
-
-\subsection{STAR story: reliability}
-
-\textbf{Situation:} Standard run failed on Groq with request-too-large error.\\
-\textbf{Task:} Preserve useful evidence while meeting account limits.\\
-\textbf{Action:} Measured stage context, bounded excerpts, capped outputs, used direct per-stage slices, and reduced source limits.\\
-\textbf{Result:} Full Standard workflow passed with 12 live sources.
-
-% -----------------------------------------------------------------------------
-\section{Future Roadmap: Interview Mein Kya Bolna Hai}
-
-\subsection{Phase 1: evidence quality}
-
-\begin{itemize}
-  \item Multiple search queries per sub-question.
-  \item Cross-encoder reranking and source diversity.
-  \item DOI canonicalization and semantic duplicate clustering.
-  \item Open-access full text through official APIs.
-  \item Claim-citation entailment verifier.
-\end{itemize}
-
-\subsection{Phase 2: evaluation and observability}
-
-\begin{itemize}
-  \item LangSmith/OpenTelemetry traces.
-  \item Golden dataset and automated LLM evaluations.
-  \item Cost, tokens, latency and source coverage dashboard.
-  \item User feedback on useful/unsupported claims.
-\end{itemize}
-
-\subsection{Phase 3: production scale}
-
-\begin{itemize}
-  \item Auth, teams and saved workspaces.
-  \item Queue-backed asynchronous runs.
-  \item PostgreSQL session/report persistence.
-  \item Redis retrieval and answer cache.
-  \item PDF/DOCX citation export and bibliography formats.
-  \item Scheduled trend monitoring and change detection.
-\end{itemize}
-
-\subsection{Phase 4: deeper agent workflow}
-
-Use LangGraph when query decomposition, iterative retrieval, evidence sufficiency decisions, human approval and checkpoint resume become necessary.
-
-% -----------------------------------------------------------------------------
-\section{Rapid Revision Cheat Sheet}
-
-\begin{keybox}[Remember this flow]
-Question \(\rightarrow\) Search plan + live sources \(\rightarrow\) Reader notes \(\rightarrow\) Writer report \(\rightarrow\) Critic feedback \(\rightarrow\) Evidence-bound Q\&A.
-\end{keybox}
-
-\begin{longtable}{p{.27\textwidth} p{.63\textwidth}}
-\toprule
-Keyword & One-line memory \\
-\midrule
-Multi-agent & Specialized bounded stages, not unrestricted autonomy. \\
-RAG & Live API retrieval augmentation, not vector-store RAG. \\
-Grounding & Model receives actual source records and may cite only their IDs. \\
-Adversarial review & Optional Groq Critic checks the completed report. \\
-Execution & Stages and source calls are sequential for readability. \\
-Token budget & Bounded source count + excerpts + direct slices + output cap. \\
-Fallback & Only Groq is optional; Gemini is required and can also run the Critic. \\
-State & Request and every intermediate artifact kept in an inspectable dictionary. \\
-Security & Ignore instructions in evidence, escape HTML, validate URL schemes, hide secrets. \\
-Deployment & Streamlit Cloud secrets or Docker environment variables. \\
-Main limitation & Snippet-level evidence and no deterministic citation entailment yet. \\
-\bottomrule
-\end{longtable}
-
-\subsection{Five lines you must be able to say}
+\subsection{Five lines yaad honi chahiye}
 
 \begin{enumerate}
-  \item ``I separate deterministic retrieval from probabilistic reasoning.''
-  \item ``The Critic independently audits the completed report; an optional revision loop is the next improvement.''
-  \item ``Citations are traceable IDs, but I do not claim that traceability alone guarantees truth.''
-  \item ``I kept the flow sequential so every stage is easy to explain and debug.''
-  \item ``The next production improvement is automated claim-citation verification and persistent async jobs.''
+  \item ``I preserved the tutorial's Search--Reader--Writer--Critic flow.''
+  \item ``Retrieval is deterministic; LLMs handle planning, comparison, writing and review.''
+  \item ``Gemini runs research and Groq optionally provides an independent Critic.''
+  \item ``Source IDs provide traceability, but I do not claim they guarantee truth.''
+  \item ``I kept the code sequential and simple, and I can name the production improvements I intentionally postponed.''
 \end{enumerate}
 
-% -----------------------------------------------------------------------------
-\section{Glossary}
+\subsection{Final checklist}
 
-\begin{longtable}{p{.23\textwidth} p{.67\textwidth}}
-\toprule
-Term & Meaning \\
-\midrule
-Agent & A model/tool stage with a specific role, inputs and output contract. \\
-Orchestrator & Code that controls order, state transfer, progress and failures. \\
-Evidence grounding & Generating analysis using retrieved records rather than memory only. \\
-Counter-signal & Evidence that weakens, limits or contradicts a proposed trend. \\
-Calibration & Matching confidence to actual evidence strength. \\
-Prompt injection & Malicious instructions hidden inside retrieved content. \\
-Reranking & Reordering retrieved results with a stronger relevance model. \\
-Entailment & Whether a source actually supports a claim. \\
-Rate limit & Provider restriction on requests/tokens over time. \\
-Context window & Maximum input plus output token capacity of a model request. \\
-Graceful degradation & Partial functionality continues when an optional component fails. \\
-Idempotency & Repeating an operation produces no unintended duplicate effect. \\
-Observability & Traces, metrics and logs that explain system behavior. \\
-\bottomrule
-\end{longtable}
-
-% -----------------------------------------------------------------------------
-\section{Final Interview Checklist}
-
-Interview se pehle confirm karo:
-
-\begin{itemize}
-  \item[$\square$] 60-second English and Hinglish pitch yaad hai.
-  \item[$\square$] Architecture without screen draw kar sakte ho.
-  \item[$\square$] Har file ki one-line responsibility bol sakte ho.
-  \item[$\square$] Why four stages, why Gemini + optional Groq, and why sequential flow explain kar sakte ho.
-  \item[$\square$] 413 token-limit STAR story ready hai.
-  \item[$\square$] Honest limitations and next improvements ready hain.
-  \item[$\square$] One successful demo query and result ready hai.
-  \item[$\square$] No key screen/share/history mein visible hai; leaked keys rotated hain.
-  \item[$\square$] GitHub and deployed Streamlit links open ho rahe hain.
-  \item[$\square$] Resume bullets metrics ke saath personalize kiye hain.
+\begin{itemize}[label=$\square$]
+  \item 60-second Hinglish and English pitch ready.
+  \item Architecture without notes draw kar sakte ho.
+  \item Har file ki responsibility explain kar sakte ho.
+  \item Four stages ke inputs and outputs clear hain.
+  \item Gemini/Groq rule and Tavily optionality clear hai.
+  \item 413, PEP 668 and secrets story ready hai.
+  \item Limitations honestly explain kar sakte ho.
+  \item Demo query and deployed link test kiye hain.
+  \item All exposed API keys rotated hain.
 \end{itemize}
 
-\vfill
-\begin{center}
-  \color{BrandDark}\rule{.72\textwidth}{.5pt}\\[3mm]
-  \textbf{Best interview mindset: architecture ko defend karo, limitations ko hide mat karo, aur har design decision ka trade-off batao.}
-\end{center}
+\begin{keybox}[Final mindset]
+Interviewer ko buzzwords se impress karne ki jagah simple execution flow, real source grounding, design trade-offs aur honest limitations explain karo. Tumhe har abstraction defend karne ki zaroorat nahi padegi because code intentionally straightforward hai.
+\end{keybox}
 
 \end{document}
