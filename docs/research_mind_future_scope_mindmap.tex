@@ -32,7 +32,7 @@
 \begin{center}
   {\LARGE\bfseries\color{Ink} Research-Mind: Future Scope Mind Map}\par
   \vspace{1mm}
-  {\small\color{Muted}Simple roadmap: pehle trust improve karo, phir features aur scale add karo}
+  {\small\color{Muted}Har item mein: \textbf{What → How} --- interviewer ke implementation question ke liye}
 \end{center}
 
 \vspace{2mm}
@@ -42,53 +42,53 @@
   line/.style={-{Latex[length=2.4mm]},very thick,rounded corners=3mm},
   center/.style={circle,minimum size=39mm,align=center,fill=Brand,text=white,
                  font=\bfseries\large,drop shadow},
-  branch/.style={rounded corners=3mm,minimum height=25mm,text width=54mm,
+  branch/.style={rounded corners=3mm,minimum height=29mm,text width=58mm,
                  align=left,inner sep=4mm,draw,very thick,drop shadow,
-                 font=\small}
+                 font=\footnotesize}
 ]
 
   \node[center] (core) at (0,0) {Research-Mind\\Future Scope};
 
   \node[branch,fill=GreenSoft,draw=Brand] (quality) at (-7.7,3.35) {
     \textbf{1. Report Quality}\\[1mm]
-    $\bullet$ Writer--Critic revision loop\\
-    $\bullet$ Citation-ID validation\\
-    $\bullet$ Claim-to-source verification
+    \textbullet\ Revision loop → LangGraph\\
+    \textbullet\ Citation validation → Python + Regex\\
+    \textbullet\ Claim verification → NLI/LLM judge
   };
 
   \node[branch,fill=BlueSoft,draw=Blue] (knowledge) at (0,3.65) {
     \textbf{2. Deeper Research}\\[1mm]
-    $\bullet$ Full-text/open-access papers\\
-    $\bullet$ User PDF upload\\
-    $\bullet$ Vector DB for saved knowledge
+    \textbullet\ Full text → Unstructured/PyMuPDF\\
+    \textbullet\ PDF upload → Streamlit uploader\\
+    \textbullet\ Saved knowledge → FAISS/Chroma
   };
 
   \node[branch,fill=OrangeSoft,draw=Orange] (search) at (7.7,3.35) {
     \textbf{3. Smarter Search}\\[1mm]
-    $\bullet$ Multiple focused sub-queries\\
-    $\bullet$ Relevance reranking\\
-    $\bullet$ Conflict and evidence-gap search
+    \textbullet\ Sub-queries → LLM decomposition\\
+    \textbullet\ Reranking → Cross-encoder\\
+    \textbullet\ Evidence gaps → Iterative search
   };
 
   \node[branch,fill=PurpleSoft,draw=Purple] (product) at (-7.7,-3.35) {
     \textbf{4. User Features}\\[1mm]
-    $\bullet$ Research history and saved reports\\
-    $\bullet$ Notes, bookmarks and comparison\\
-    $\bullet$ Team sharing and comments
+    \textbullet\ Research history → PostgreSQL\\
+    \textbullet\ Notes/bookmarks → DB schema\\
+    \textbullet\ Team sharing → RBAC
   };
 
   \node[branch,fill=GoldSoft,draw=Gold] (scale) at (0,-3.65) {
     \textbf{5. Production Scale}\\[1mm]
-    $\bullet$ Background research jobs\\
-    $\bullet$ Cache + database persistence\\
-    $\bullet$ Auth, quotas and rate limits
+    \textbullet\ Background jobs → Celery/RQ\\
+    \textbullet\ Cache/state → Redis + Postgres\\
+    \textbullet\ Auth/limits → OAuth + limiter
   };
 
   \node[branch,fill=RedSoft,draw=Red] (safety) at (7.7,-3.35) {
     \textbf{6. Safety and Review}\\[1mm]
-    $\bullet$ Source-quality scoring\\
-    $\bullet$ Specialized critics\\
-    $\bullet$ Human approval for high-stakes use
+    \textbullet\ Source score → Authority rubric\\
+    \textbullet\ Special critics → Prompt chains\\
+    \textbullet\ Human approval → Review workflow
   };
 
   \draw[line,color=Brand] (core.north west) -- (quality.south east);
@@ -110,8 +110,8 @@
 \centering
 \textbf{Recommended priority:}
 \color{BrandDark}
-Citation validation $\rightarrow$ Writer--Critic revision $\rightarrow$
-Claim verification $\rightarrow$ PDF/full-text support $\rightarrow$ User history $\rightarrow$ Scale
+Citation validation → Writer--Critic revision →
+Claim verification → PDF/full-text support → User history → Scale
 \end{tcolorbox}
 
 \end{document}
