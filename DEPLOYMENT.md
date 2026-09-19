@@ -13,6 +13,8 @@
    ```toml
    GROQ_API_KEY = "your-key"
    GROQ_MODEL = "openai/gpt-oss-20b"
+   GOOGLE_API_KEY = "your-key"
+   GOOGLE_MODEL = "gemini-3.6-flash"
    MAX_OUTPUT_TOKENS = "1400"
    # Optional
    TAVILY_API_KEY = "your-key"
@@ -29,6 +31,8 @@ Configure these environment variables in the hosting dashboard:
 
 - `GROQ_API_KEY` (required unless using another supported model provider)
 - `GROQ_MODEL=openai/gpt-oss-20b`
+- `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemini-3.6-flash` (recommended for
+  automatic multi-model routing)
 - `MAX_OUTPUT_TOKENS=1400`
 - `TAVILY_API_KEY` (optional)
 

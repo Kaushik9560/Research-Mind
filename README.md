@@ -16,6 +16,11 @@ challenges weak claims, and produces a source-mapped report.
    exceed the evidence.
 5. **Lead Researcher** writes the final cited report.
 
+When both Google and Groq keys are configured, InsightForge routes evidence-heavy
+analysis to Gemini and the adversarial review to Groq. Quick scans reverse the
+route for speed. If only one provider is available, the full workflow uses it
+automatically.
+
 Every collected source receives a stable ID such as `[S3]`. The report, trend
 radar, adversarial review, evidence library, and full audit trail remain visible
 and can be exported as Markdown.

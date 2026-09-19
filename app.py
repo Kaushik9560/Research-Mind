@@ -24,6 +24,7 @@ for secret_name in (
     "GROQ_MODEL",
     "MAX_OUTPUT_TOKENS",
     "GOOGLE_API_KEY",
+    "GOOGLE_MODEL",
     "OPENAI_API_KEY",
     "TAVILY_API_KEY",
 ):
@@ -370,6 +371,12 @@ if result:
     with method_tab:
         st.markdown("### Research strategy")
         st.markdown(result.get("strategy", ""))
+        model_plan = result.get("model_plan", {})
+        if isinstance(model_plan, dict):
+            st.caption(
+                f"Automatic model routing: {model_plan.get('primary', 'Auto')} synthesis · "
+                f"{model_plan.get('reviewer', 'Auto')} independent review"
+            )
         with st.expander("Run configuration"):
             if isinstance(request_data, dict):
                 st.json(request_data)
@@ -401,6 +408,9 @@ if result:
                         str(request_data.get("language", "English"))
                         if isinstance(request_data, dict)
                         else "English",
+                        str(result.get("model_plan", {}).get("primary", "Auto"))
+                        if isinstance(result.get("model_plan"), dict)
+                        else "Auto",
                     )
                 except Exception:
                     answer = "I could not answer that follow-up. Please try again."

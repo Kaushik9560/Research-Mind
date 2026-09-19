@@ -11,6 +11,7 @@ from agents import (
     analyze_trends,
     build_research_strategy,
     challenge_analysis,
+    research_provider_plan,
     synthesize_report,
 )
 from tools import collect_evidence, format_evidence
@@ -84,9 +85,11 @@ def run_research_pipeline(
     """Run the complete, inspectable multi-agent research workflow."""
     state: dict[str, object] = {"request": asdict(request)}
     profile = request.to_prompt()
+    model_plan = research_provider_plan(request.depth)
+    state["model_plan"] = model_plan
 
     _notify(on_progress, "strategist", "running")
-    state["strategy"] = build_research_strategy(profile)
+    state["strategy"] = build_research_strategy(profile, model_plan["primary"])
     _notify(on_progress, "strategist", "done")
 
     _notify(on_progress, "collector", "running")
@@ -110,6 +113,7 @@ def run_research_pipeline(
         profile,
         str(state["strategy"]),
         evidence_text,
+        model_plan["primary"],
     )
     _notify(on_progress, "analyst", "done")
 
@@ -118,6 +122,7 @@ def run_research_pipeline(
         profile,
         str(state["trends"]),
         evidence_text,
+        model_plan["reviewer"],
     )
     _notify(on_progress, "skeptic", "done")
 
@@ -128,6 +133,7 @@ def run_research_pipeline(
         str(state["trends"]),
         str(state["challenge"]),
         evidence_text,
+        model_plan["primary"],
     )
     _notify(on_progress, "writer", "done")
     return state

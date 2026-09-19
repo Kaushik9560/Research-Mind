@@ -17,50 +17,115 @@ class ModelConfigurationError(RuntimeError):
     """Raised when no supported model provider is configured."""
 
 
-@lru_cache(maxsize=1)
-def get_llm():
-    """Select a configured provider without forcing one vendor on the user."""
+def _resolve_provider(provider: str = "Auto") -> str:
+    requested = provider.strip().lower()
+    if requested in {"groq", "google", "gemini", "openai"}:
+        resolved = "google" if requested == "gemini" else requested
+        key_name = {
+            "groq": "GROQ_API_KEY",
+            "google": "GOOGLE_API_KEY",
+            "openai": "OPENAI_API_KEY",
+        }[resolved]
+        if not os.getenv(key_name):
+            raise ModelConfigurationError(f"{provider} is selected, but {key_name} is missing.")
+        return resolved
+
     if os.getenv("GROQ_API_KEY"):
-        from langchain_groq import ChatGroq
-
-        return ChatGroq(
-            model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
-            temperature=0.15,
-            max_tokens=int(os.getenv("MAX_OUTPUT_TOKENS", "1400")),
-        )
+        return "groq"
     if os.getenv("GOOGLE_API_KEY"):
-        from langchain_google_genai import ChatGoogleGenerativeAI
-
-        return ChatGoogleGenerativeAI(
-            model=os.getenv("GOOGLE_MODEL", "gemini-2.0-flash"),
-            temperature=0.15,
-        )
+        return "google"
     if os.getenv("OPENAI_API_KEY"):
-        from langchain_openai import ChatOpenAI
-
-        return ChatOpenAI(
-            model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
-            temperature=0.15,
-        )
+        return "openai"
     raise ModelConfigurationError(
         "No model key found. Add GROQ_API_KEY, GOOGLE_API_KEY, or "
-        "OPENAI_API_KEY to your .env file."
+        "OPENAI_API_KEY to your secrets."
     )
 
 
-def provider_name() -> str:
-    if os.getenv("GROQ_API_KEY"):
-        return "Groq"
-    if os.getenv("GOOGLE_API_KEY"):
-        return "Google Gemini"
-    if os.getenv("OPENAI_API_KEY"):
-        return "OpenAI"
-    return "Not configured"
+@lru_cache(maxsize=6)
+def _build_llm(provider: str, model: str, max_tokens: int):
+    if provider == "groq":
+        from langchain_groq import ChatGroq
+
+        return ChatGroq(
+            model=model,
+            temperature=0.15,
+            max_tokens=max_tokens,
+        )
+    if provider == "google":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        return ChatGoogleGenerativeAI(
+            model=model,
+            temperature=0.15,
+            max_output_tokens=max_tokens,
+        )
+    if provider == "openai":
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(
+            model=model,
+            temperature=0.15,
+            max_tokens=max_tokens,
+        )
+    raise ModelConfigurationError(f"Unsupported provider: {provider}")
 
 
-def _invoke(system: str, human: str, **values: str) -> str:
+def get_llm(provider: str = "Auto"):
+    """Return a cached model client for the explicitly selected provider."""
+    resolved = _resolve_provider(provider)
+    models = {
+        "groq": os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
+        "google": os.getenv("GOOGLE_MODEL", "gemini-3.6-flash"),
+        "openai": os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
+    }
+    return _build_llm(resolved, models[resolved], int(os.getenv("MAX_OUTPUT_TOKENS", "1400")))
+
+
+def provider_name(provider: str = "Auto") -> str:
+    if provider.strip().lower() == "auto":
+        configured = []
+        if os.getenv("GOOGLE_API_KEY"):
+            configured.append("Gemini")
+        if os.getenv("GROQ_API_KEY"):
+            configured.append("Groq")
+        if os.getenv("OPENAI_API_KEY"):
+            configured.append("OpenAI")
+        return " + ".join(configured) if configured else "Not configured"
+    try:
+        return {"groq": "Groq", "google": "Gemini", "openai": "OpenAI"}[
+            _resolve_provider(provider)
+        ]
+    except ModelConfigurationError:
+        return "Not configured"
+
+
+def research_provider_plan(depth: str) -> dict[str, str]:
+    """Route work for quality while keeping a single-provider fallback."""
+    has_gemini = bool(os.getenv("GOOGLE_API_KEY"))
+    has_groq = bool(os.getenv("GROQ_API_KEY"))
+    has_openai = bool(os.getenv("OPENAI_API_KEY"))
+
+    if has_gemini and has_groq:
+        # Gemini gets the larger evidence-heavy stages. Groq supplies an
+        # independent review; for quick scans the priority flips to latency.
+        if depth == "Quick scan":
+            return {"primary": "Groq", "reviewer": "Gemini"}
+        return {"primary": "Gemini", "reviewer": "Groq"}
+    if has_gemini:
+        return {"primary": "Gemini", "reviewer": "Gemini"}
+    if has_groq:
+        return {"primary": "Groq", "reviewer": "Groq"}
+    if has_openai:
+        return {"primary": "OpenAI", "reviewer": "OpenAI"}
+    raise ModelConfigurationError(
+        "No model key found. Add GOOGLE_API_KEY, GROQ_API_KEY, or OPENAI_API_KEY."
+    )
+
+
+def _invoke(system: str, human: str, provider: str = "Auto", **values: str) -> str:
     prompt = ChatPromptTemplate.from_messages([("system", system), ("human", human)])
-    chain = prompt | get_llm() | StrOutputParser()
+    chain = prompt | get_llm(provider) | StrOutputParser()
     try:
         return chain.invoke(values).strip()
     except Exception as exc:
@@ -94,7 +159,7 @@ from inference. If evidence is thin or conflicting, say so plainly.
 """
 
 
-def build_research_strategy(profile: str) -> str:
+def build_research_strategy(profile: str, provider: str = "Auto") -> str:
     """Scope the question before searching so the pipeline stays focused."""
     return _invoke(
         """You are InsightForge's Research Strategist. Turn broad questions into
@@ -105,11 +170,12 @@ answer the research question yet. Keep the plan under 500 words.""",
         "RESEARCH REQUEST\n{profile}\n\n"
         "Return Markdown with these headings: Research frame, Key sub-questions, "
         "Evidence criteria, and Blind spots.",
+        provider=provider,
         profile=profile,
     )
 
 
-def analyze_trends(profile: str, strategy: str, evidence: str) -> str:
+def analyze_trends(profile: str, strategy: str, evidence: str, provider: str = "Auto") -> str:
     """Extract patterns, momentum and emerging signals from source records."""
     return _invoke(
         f"""You are InsightForge's Trend Analyst. Analyze recency, repetition
@@ -122,13 +188,14 @@ early signal and from hype. Do not use citation count alone as proof of quality.
         "## Established trends; ## Emerging signals; ## Drivers; ## Counter-signals; "
         "and ## Evidence gaps. Give each trend a confidence of High, Medium, or Low "
         "and cite the supporting records inline.",
+        provider=provider,
         profile=_clip(profile, 1800),
         strategy=_clip(strategy, 3000),
         evidence=_clip(evidence, 12000),
     )
 
 
-def challenge_analysis(profile: str, trends: str, evidence: str) -> str:
+def challenge_analysis(profile: str, trends: str, evidence: str, provider: str = "Auto") -> str:
     """Act as an adversarial reviewer before the final synthesis."""
     return _invoke(
         f"""You are InsightForge's Skeptic Agent. Stress-test the trend analysis.
@@ -140,6 +207,7 @@ a finding merely because it is new. {EVIDENCE_RULES}""",
         "EVIDENCE RECORDS\n{evidence}\n\nReturn: # Adversarial review; "
         "## Claims that hold up; ## Claims to weaken; ## Contradictions; "
         "## Missing evidence; and ## Verdict. Cite records inline.",
+        provider=provider,
         profile=_clip(profile, 1800),
         trends=_clip(trends, 5000),
         evidence=_clip(evidence, 9000),
@@ -152,6 +220,7 @@ def synthesize_report(
     trends: str,
     challenge: str,
     evidence: str,
+    provider: str = "Auto",
 ) -> str:
     """Produce the decision-ready, source-grounded research report."""
     return _invoke(
@@ -169,6 +238,7 @@ cite the strategy or another agent as evidence. {EVIDENCE_RULES}""",
         "## Research gaps\n## Next questions\n## Method note\n\n"
         "Use compact tables where comparisons help. Do not add a source list; the "
         "application renders the evidence library separately.",
+        provider=provider,
         profile=_clip(profile, 1800),
         strategy=_clip(strategy, 2200),
         trends=_clip(trends, 4500),
@@ -177,7 +247,12 @@ cite the strategy or another agent as evidence. {EVIDENCE_RULES}""",
     )
 
 
-def answer_follow_up(context: str, question: str, language: str) -> str:
+def answer_follow_up(
+    context: str,
+    question: str,
+    language: str,
+    provider: str = "Auto",
+) -> str:
     """Answer a follow-up without leaving the collected evidence boundary."""
     return _invoke(
         f"""You are an evidence-grounded research assistant. Answer directly,
@@ -186,6 +261,7 @@ evidence cannot answer the question, state what new search is needed. Keep the
 answer under 500 words. {EVIDENCE_RULES}""",
         "RESEARCH CONTEXT\n{context}\n\nFOLLOW-UP QUESTION\n{question}\n\n"
         "Answer in {language}.",
+        provider=provider,
         context=_clip(context, 14000),
         question=question,
         language=language,
