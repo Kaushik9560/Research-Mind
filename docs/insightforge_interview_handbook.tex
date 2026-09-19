@@ -141,7 +141,7 @@
 \section{Sabse Pehle: 60-Second Project Summary}
 
 \begin{keybox}[One-line definition]
-InsightForge ek multi-agent research intelligence platform hai jo kisi bhi domain ke recent academic papers, news aur optional web sources collect karta hai, unmein trends aur counter-signals identify karta hai, claims ko adversarially review karta hai, aur traceable source IDs ke saath final research brief generate karta hai.
+InsightForge original tutorial ke simple \textbf{Search Agent $\rightarrow$ Reader Agent $\rightarrow$ Writer Chain $\rightarrow$ Critic Chain} template par bana multi-agent research platform hai. Yeh recent academic papers, news aur optional web sources collect karke cited report aur independent feedback generate karta hai.
 \end{keybox}
 
 \subsection{Problem kya solve hoti hai?}
@@ -161,13 +161,13 @@ InsightForge is gap ko evidence-first workflow aur specialized agents se solve k
 \subsection{English elevator pitch}
 
 \begin{answerbox}
-``I built an evidence-first, multi-agent research platform that searches recent scholarly and news sources, assigns stable citation IDs, separates established trends from early signals, runs an independent adversarial review, and produces a decision-ready report. It automatically routes evidence-heavy work to Gemini and independent review to Groq, while retaining a single-provider fallback.''
+``I started with a tutorial-based Search, Reader, Writer, and Critic workflow, then upgraded each stage for real-world research. The Search Agent uses live academic and news sources, the Reader compares all retrieved evidence, the Writer produces a source-ID-grounded report, and the Critic independently checks weak claims. Gemini and Groq are routed automatically with a single-provider fallback.''
 \end{answerbox}
 
 \subsection{Hinglish elevator pitch}
 
 \begin{answerbox}
-``Maine ek multi-agent research system banaya jo sirf LLM memory par depend nahi karta. Yeh live OpenAlex papers aur recent news collect karta hai, har source ko S1/S2 ID deta hai, Trend Analyst patterns nikalta hai, Skeptic Agent weak claims challenge karta hai, aur Lead Researcher cited final report banata hai. Standard research mein Gemini synthesis aur Groq independent review karta hai.''
+``Maine tutorial ke Search Agent, Reader Agent, Writer Chain aur Critic Chain ko base rakha. Search stage live papers/news laati hai, Reader saare evidence compare karta hai, Writer cited report banata hai aur Critic weak claims check karta hai. Iske upar maine Gemini/Groq routing, source IDs, responsive UI aur deployment add kiya.''
 \end{answerbox}
 
 \subsection{Project ke strongest differentiators}
@@ -224,9 +224,9 @@ Repository mein files pehle se thi, isliye unhe zero se random order mein create
 Step & File / concern & Kya banaya gaya \\
 \midrule
 1 & Product scope & Generic report generator ko universal research intelligence product define kiya. \\
-2 & \file{agents.py} & Provider abstraction aur specialized agent prompts design kiye. \\
+2 & \file{agents.py} & Original two-agent/two-chain contract preserve karke grounded prompts aur provider abstraction add ki. \\
 3 & \file{tools.py} & OpenAlex, Google News RSS aur optional Tavily collectors banaye. \\
-4 & \file{pipeline.py} & Typed request, shared state aur sequential orchestration banayi. \\
+4 & \file{pipeline.py} & Original four sequential stages, familiar state keys, typed request and progress callback banaye. \\
 5 & \file{app.py} & Responsive Streamlit experience, progress, tabs, evidence cards aur follow-up chat banaya. \\
 6 & Reliability & Query normalization, timeouts, deduplication, context clipping aur 413 retry add hua. \\
 7 & Model routing & Gemini/Groq automatic stage routing aur fallback add hua. \\
@@ -236,7 +236,7 @@ Step & File / concern & Kya banaya gaya \\
 \end{longtable}
 
 \begin{keybox}[Interview clarity]
-Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: repository skeleton already present tha. Product refactor mein pehle agent contracts define kiye, phir evidence tools, phir orchestrator, aur finally UI. Greenfield project hota to main pehle data contracts and tools, phir agents, pipeline, UI aur deployment banata.
+Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: tutorial repository mein \file{agents.py}, \file{tools.py}, \file{pipeline.py} aur \file{app.py} skeleton already tha. Humne same learning order aur names preserve kiye: tools/agents samjhe, four-step pipeline improve ki, phir UI aur deployment add kiya.
 \end{keybox}
 
 % -----------------------------------------------------------------------------
@@ -248,7 +248,7 @@ Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: re
   \item User research question, time range, depth, language, domain, region aur audience de sake.
   \item Academic papers and recent news default source hon.
   \item Tavily key ho to general web optional source ho.
-  \item Output mein brief, trend radar, evidence, critical review and method ho.
+  \item Output mein report, Reader notes, source library, Critic feedback and Search plan ho.
   \item User source-grounded follow-up question pooch sake.
   \item Full report Markdown mein download ho sake.
   \item English, Hinglish aur Hindi output support ho.
@@ -278,26 +278,24 @@ Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: re
 ]
   \node[box] (ui) {Streamlit UI\\\small request + settings};
   \node[agent,below=of ui] (pipe) {Pipeline Orchestrator\\\small shared state};
-  \node[agent,below left=of pipe] (strategy) {Research Strategist};
-  \node[data,below=of pipe] (collect) {Evidence Collector\\\small OpenAlex / News / Tavily};
-  \node[agent,below right=of pipe] (trend) {Trend Analyst};
-  \node[agent,below=18mm of collect] (skeptic) {Skeptic Agent\\\small independent provider};
-  \node[agent,below=of skeptic] (writer) {Lead Researcher};
-  \node[box,below=of writer] (result) {Brief + Trends + Evidence\\Critical review + Export + Q\&A};
+  \node[agent,below=of pipe] (search) {1. Search Agent\\\small plan + live source tools};
+  \node[data,below=of search] (reader) {2. Reader Agent\\\small compare all evidence};
+  \node[agent,below=of reader] (writer) {3. Writer Chain\\\small cited report};
+  \node[agent,below=of writer] (critic) {4. Critic Chain\\\small independent provider};
+  \node[box,below=of critic] (result) {Report + Reader notes + Sources\\Critic feedback + Export + Q\&A};
 
   \draw[arrow] (ui) -- (pipe);
-  \draw[arrow] (pipe) -- (strategy);
-  \draw[arrow] (strategy) -- (collect);
-  \draw[arrow] (collect) -- (trend);
-  \draw[arrow] (trend) -- (skeptic);
-  \draw[arrow] (skeptic) -- (writer);
-  \draw[arrow] (writer) -- (result);
+  \draw[arrow] (pipe) -- (search);
+  \draw[arrow] (search) -- (reader);
+  \draw[arrow] (reader) -- (writer);
+  \draw[arrow] (writer) -- (critic);
+  \draw[arrow] (critic) -- (result);
 \end{tikzpicture}
 \end{center}
 
 \subsection{Why sequential pipeline?}
 
-Agents ka order dependency-driven hai. Trend Analyst ko evidence chahiye; Skeptic ko proposed trend analysis chahiye; Writer ko trends aur critique dono chahiye. Isliye core reasoning sequential hai. Sirf independent evidence collectors parallel run karte hain.
+Stages ka order tutorial jaisa dependency-driven hai. Reader ko Search results chahiye, Writer ko Reader notes chahiye, aur Critic ko completed report chahiye. Isliye core reasoning sequential hai. Search stage ke independent OpenAlex, News aur Tavily calls parallel run karte hain.
 
 \interview{I parallelized I/O-bound collectors, but kept dependent reasoning stages sequential because each stage consumes the previous stage's artifact.}
 
@@ -344,7 +342,7 @@ Is file ki responsibilities:
   \item Automatic primary/reviewer plan choose karna.
   \item Prompt template ko model aur string parser se compose karna.
   \item Oversized context ko clip aur 413 par compact retry karna.
-  \item Har specialized agent ka role prompt define karna.
+  \item Tutorial ke Search, Reader, Writer aur Critic prompts define karna.
 \end{enumerate}
 
 \subsubsection{Provider resolution}
@@ -386,7 +384,7 @@ Why two providers? Same model ko apna answer criticize karwana useful hai, lekin
 
 \begin{itemize}
   \item Role clearly specified.
-  \item Input sections named: request, strategy, evidence, trends.
+  \item Input sections named: request, search plan, evidence, reader notes and report.
   \item Output structure fixed using Markdown headings.
   \item Evidence boundary explicit: only \code{[S3]} style supplied IDs cite karo.
   \item Retrieved text ko untrusted data treat karo; embedded instructions ignore karo.
@@ -396,7 +394,7 @@ Why two providers? Same model ko apna answer criticize karwana useful hai, lekin
 
 \subsubsection{Context clipping and retry}
 
-\code{_clip()} long string ka approximately 72\% beginning aur remaining tail preserve karta hai. Middle ke place marker insert hota hai. Beginning mein definitions/evidence aur tail mein conclusions often useful hote hain. Agar provider still HTTP 413 ``request too large'' return kare, \code{_invoke()} values ko approximately 55\% size par compact karke exactly one retry karta hai.
+\code{_clip()} long string ka approximately 72\% beginning aur remaining tail preserve karta hai. Middle ke place marker insert hota hai. Beginning mein definitions/evidence aur tail mein conclusions often useful hote hain. Agar provider still HTTP 413 ``request too large'' return kare, \code{invoke_chain()} values ko approximately 55\% size par compact karke exactly one retry karta hai.
 
 \begin{keybox}[Why exactly one retry?]
 Unlimited retry loop cost aur latency explode kar sakta hai. 413 deterministic sizing error hai; one smaller retry rational hai. Authentication ya general 429 error ko same logic se blindly retry nahi kiya gaya.
@@ -405,6 +403,8 @@ Unlimited retry loop cost aur latency explode kar sakta hai. 413 deterministic s
 \subsection{\texorpdfstring{\texttt{tools.py}}{tools.py}: live evidence layer}
 
 Yeh file model-independent data acquisition karti hai.
+
+Video se direct mapping ke liye \code{web\_search(query)} aur \code{scrape\_url(url)} names ab bhi available hain. Deployed pipeline structured cards ke liye richer \code{collect\_evidence()} use karti hai. Iska matlab concept replace nahi hua; original tool ko production data contract mila.
 
 \subsubsection{OpenAlex collector}
 
@@ -470,6 +470,12 @@ HTML tags and repeated whitespace remove hote hain. Summary 500 characters tak b
 
 Fields: question, domain, days, period label, region, audience, depth, language, and source toggles.
 
+Pipeline plain topic string bhi accept karti hai. Isliye video wala call ab bhi valid mental model hai:
+\begin{center}
+\code{run\_research\_pipeline(topic)}
+\end{center}
+Streamlit richer configuration ke liye \code{ResearchRequest} pass karta hai.
+
 \subsubsection{Query normalization}
 
 Natural question OpenAlex ko over-constrain kar sakta tha. \code{_build_search_query()} punctuation and common question/recency stopwords remove karta hai, duplicate terms hataata hai, important short token \code{ai} preserve karta hai, aur query ko first 12 terms tak limit karta hai.
@@ -490,13 +496,13 @@ Pipeline ek dictionary mein inspectable artifacts rakhti hai:
 state = {
     "request": {...},
     "model_plan": {"primary": "Gemini", "reviewer": "Groq"},
-    "strategy": "...",
-    "search_query": "...",
+    "search_plan": "...",
+    "search_results": "...",
     "evidence": [...],
-    "warnings": [...],
-    "trends": "...",
-    "challenge": "...",
-    "report": "..."
+    "reader_notes": "...",
+    "scraped_content": "...",
+    "report": "...",
+    "feedback": "..."
 }
 \end{lstlisting}
 
@@ -515,8 +521,8 @@ Responsibilities:
   \item Local env plus Streamlit Cloud secrets bridge.
   \item Example questions and compact research form.
   \item Advanced domain/region/audience/source settings.
-  \item Agent progress bar without duplicate log rows.
-  \item Brief, trends, evidence, critical review and method tabs.
+  \item Four-stage progress bar without duplicate log rows.
+  \item Report, Reader notes, Sources, Critic feedback and Search plan tabs.
   \item Evidence cards with safe HTML escaping and validated link schemes.
   \item Report download and evidence-bound follow-up chat.
   \item Session state for result and conversation continuity.
@@ -550,39 +556,34 @@ File & Purpose \\
 \end{longtable}
 
 % -----------------------------------------------------------------------------
-\section{Five Agents: Role, Input, Output, Value}
+\section{Tutorial Ke Four Stages: Role, Input, Output, Upgrade}
 
-\subsection{1. Research Strategist}
+\subsection{1. Search Agent}
 
 \textbf{Input:} complete research profile.\\
-\textbf{Output:} research frame, sub-questions, evidence criteria and blind spots.\\
-\textbf{Why:} vague question ko structured scope mein convert karta hai. Search se pehle scope clarity irrelevant evidence reduce karti hai.
+\textbf{Output:} search objective, sub-questions, evidence criteria, blind spots, normalized query and live records.\\
+\textbf{Tutorial connection:} original Search Agent Tavily tool call karta tha. Upgraded stage same responsibility rakhti hai, lekin OpenAlex + Google News + optional Tavily use karti hai aur structured \code{[Sx]} IDs deti hai.
 
-\subsection{2. Evidence Collector}
+\subsection{2. Reader Agent}
 
-Yeh LLM agent nahi, deterministic tool stage hai. Live APIs/RSS call karta hai. Isse facts aur retrieval code model imagination se separate rehte hain.
+\textbf{Input:} Search plan + all retrieved records.\\
+\textbf{Output:} established findings, emerging signals, disagreements, limitations and evidence gaps.\\
+\textbf{Tutorial connection:} original Reader ek selected URL scrape karta tha. Production version saare bounded abstracts/snippets compare karta hai, kyunki one-page selection brittle aur biased ho sakta hai. Original \code{scrape\_url()} helper learning compatibility ke liye available hai.
 
-\textbf{Output:} standardized evidence records, warnings, and citation IDs.
+\subsection{3. Writer Chain}
 
-\subsection{3. Trend Analyst}
+\textbf{Input:} request profile + Reader notes + exact source records.\\
+\textbf{Output:} audience-specific cited report with key findings, trends, uncertainty, implications and method note.\\
+\textbf{Tutorial connection:} same LangChain composition---\code{prompt | llm | StrOutputParser()}---use hoti hai; prompt ko evidence IDs aur uncertainty rules se strengthen kiya gaya.
 
-\textbf{Input:} profile + strategy + evidence.\\
-\textbf{Output:} established trends, emerging signals, drivers, counter-signals and gaps with confidence labels.\\
-\textbf{Important:} repeated headline ko trend assume nahi karta; source independence, recency, adoption and policy/market drivers consider karne ka prompt hai.
+\subsection{4. Critic Chain}
 
-\subsection{4. Skeptic Agent}
+\textbf{Input:} completed report + exact source records.\\
+\textbf{Output:} score, strengths, claims to improve, missing/conflicting evidence and one-line verdict.\\
+\textbf{Checks:} unsupported citations, selection bias, duplicate reporting, correlation vs causation, date/geography mismatch and overconfidence. Dono keys ho to Critic independent provider use karta hai.
 
-\textbf{Input:} proposed trends + evidence.\\
-\textbf{Output:} claims that hold, claims to weaken, contradictions, missing evidence and verdict.\\
-\textbf{Checks:} selection bias, duplicate reporting, correlation vs causation, date mismatch, geography mismatch, commercial incentives, sample weakness, unsupported claims.
-
-\subsection{5. Lead Researcher}
-
-\textbf{Input:} strategy + trends + adversarial review + evidence.\\
-\textbf{Output:} audience-specific report with executive answer, findings, trend landscape, change, uncertainty, implications, gaps, next questions and method note.
-
-\begin{keybox}[Why Writer comes after Skeptic]
-Critic feedback ko sirf side panel mein dikhana enough nahi tha. Final writer critique consume karta hai, isliye weak claims final report mein soften/remove ho sakte hain. This is review-before-publication, not review-after-publication.
+\begin{keybox}[Important honest limitation]
+Tutorial order preserve karne ke liye Critic completed report ke baad feedback deta hai. Current report automatically rewrite nahi hoti. Future optional revision loop Critic feedback ko Writer mein wapas bhej sakta hai, lekin tab workflow tutorial ke simple four-stage path se aage badhega.
 \end{keybox}
 
 % -----------------------------------------------------------------------------
@@ -593,15 +594,14 @@ Critic feedback ko sirf side panel mein dikhana enough nahi tha. Final writer cr
   \item App empty question and empty source selection validate karti hai.
   \item UI values se immutable \code{ResearchRequest} banta hai.
   \item Pipeline depth ke basis par provider plan select karti hai.
-  \item Strategist scope banata hai.
+  \item Search Agent question ko scope karta hai aur plan banata hai.
   \item Natural question keyword query mein normalize hoti hai.
-  \item Selected collectors parallel run karte hain.
+  \item Search stage ke selected collectors parallel run karte hain.
   \item Records clean, deduplicate and source-ID assign hote hain.
-  \item Evidence model-friendly bounded text mein serialize hota hai.
-  \item Trend Analyst evidence se trend map banata hai.
-  \item Skeptic, preferably another provider, claims stress-test karta hai.
-  \item Lead Researcher critique-aware final report banata hai.
-  \item UI state ko metrics and five tabs mein render karti hai.
+  \item Reader Agent saare bounded records compare karke research notes banata hai.
+  \item Writer Chain notes + evidence se cited report banati hai.
+  \item Critic Chain, preferably another provider, completed report stress-test karti hai.
+  \item UI state ko metrics and five result tabs mein render karti hai.
   \item Export full report + source library + audit trail combine karta hai.
   \item Follow-up chat same evidence boundary ke andar answer karti hai.
 \end{enumerate}
@@ -666,8 +666,8 @@ Retrieved snippets untrusted hain. System prompt explicitly bolta hai: evidence 
 
 \subsection{Problem 1: Groq HTTP 413 / 8K token request}
 
-\textbf{Symptom:} Skeptic stage ne approximately 8319 tokens request kiye, account limit 8000 thi.\\
-\textbf{Root cause:} trends + evidence + prompts ka combined context too large tha.\\
+\textbf{Symptom:} review stage ne approximately 8319 tokens request kiye, account limit 8000 thi.\\
+\textbf{Root cause:} report + evidence + prompts ka combined context too large tha.\\
 \textbf{Fixes:}
 
 \begin{itemize}
@@ -679,10 +679,10 @@ Retrieved snippets untrusted hain. System prompt explicitly bolta hai: evidence 
   \item One-time compact retry on 413.
 \end{itemize}
 
-\textbf{Verification:} Standard pipeline 12 live sources, Trend, Skeptic and Writer stages ke saath successfully run hui.
+\textbf{Verification:} Standard pipeline live sources aur all four tutorial-aligned stages ke saath successfully run hui.
 
 \begin{answerbox}
-\textbf{STAR version:} Situation -- production-like run Skeptic stage par 413 se fail hua. Task -- evidence quality lose kiye bina token limit ke andar lana. Action -- per-stage token budgeting, bounded excerpts, output cap and compact retry add kiya. Result -- same Standard flow 12 sources ke saath end-to-end pass hua.
+\textbf{STAR version:} Situation -- production-like run Critic stage par 413 se fail hua. Task -- evidence quality lose kiye bina token limit ke andar lana. Action -- per-stage token budgeting, bounded excerpts, output cap and compact retry add kiya. Result -- same four-stage flow end-to-end pass hua.
 \end{answerbox}
 
 \subsection{Problem 2: OpenAlex relevance weak thi}
@@ -883,7 +883,7 @@ Let \(S\) be number of selected source collectors and \(N\) total returned recor
 
 \textbf{Q1. Why did you use multiple agents instead of one large prompt?}
 \begin{answerbox}
-Separation of concerns. Scope, retrieval, trend detection, adversarial review and final communication have different success criteria. Intermediate artifacts are inspectable, retryable and testable. The trade-off is added latency and token cost.
+I preserved the tutorial's separation of concerns: Search plans and retrieves, Reader compares evidence, Writer communicates, and Critic audits. Intermediate artifacts are inspectable and testable. The trade-off is added latency and token cost compared with one prompt.
 \end{answerbox}
 
 \textbf{Q2. Are these autonomous agents?}
@@ -891,9 +891,9 @@ Separation of concerns. Scope, retrieval, trend detection, adversarial review an
 They are specialized LLM-powered stages in a controlled orchestration, not fully autonomous agents with unrestricted planning. I deliberately kept the workflow bounded for reliability and auditability.
 \end{answerbox}
 
-\textbf{Q3. Why is Evidence Collector not an LLM?}
+\textbf{Q3. Why are live source calls deterministic even though it is called Search Agent?}
 \begin{answerbox}
-Retrieval should be deterministic and observable. HTTP clients are better for APIs/RSS; the LLM is used where semantic judgment is required.
+The Search stage combines an LLM search plan with deterministic HTTP/API tools. Retrieval itself should be observable and reproducible; the model handles semantic scoping, not fabrication of search results.
 \end{answerbox}
 
 \textbf{Q4. How does data move between agents?}
@@ -957,7 +957,7 @@ The routing plan detects configured providers. A single provider performs both p
 
 \textbf{Q15. How do you control hallucination?}
 \begin{answerbox}
-Live evidence, stable source IDs, explicit evidence rules, low temperature, uncertainty instructions, an independent Skeptic, and a final writer that consumes critique. I still communicate that this reduces but cannot eliminate hallucination.
+Live evidence, stable source IDs, explicit evidence rules, low temperature, uncertainty instructions, and an independent Critic that audits the completed report. I still communicate that this reduces but cannot eliminate hallucination.
 \end{answerbox}
 
 \textbf{Q16. What is prompt injection here?}
@@ -1048,7 +1048,7 @@ Cache retrieval, hash and reuse identical evidence, route quick scans to cheaper
 
 \textbf{Q32. How would you improve search?}
 \begin{answerbox}
-Generate multiple structured subqueries from the strategy, search each, rerank with a cross-encoder, diversify by source/domain/date, and stop when evidence saturation is reached.
+Generate multiple structured subqueries from the Search Agent plan, search each, rerank with a cross-encoder, diversify by source/domain/date, and stop when evidence saturation is reached.
 \end{answerbox}
 
 \textbf{Q33. Is an LLM critic actually reliable?}
@@ -1074,7 +1074,7 @@ Interview demo mein random clicking avoid karo. Yeh sequence follow karo:
 \begin{enumerate}
   \item \textbf{Problem (15 sec):} ``Search gives links, chatbot gives unverified prose; this product joins live evidence with structured critique.''
   \item \textbf{Input (15 sec):} Example select karo; 1 year, Standard, English. More options mein sources show karo.
-  \item \textbf{Agents (20 sec):} Five cards explain karo. Start research press karo and progress bar point out karo.
+  \item \textbf{Stages (20 sec):} Four tutorial-aligned cards explain karo. Start research press karo and progress bar point out karo.
   \item \textbf{Brief (25 sec):} Executive answer and inline \code{[Sx]} citations show karo.
   \item \textbf{Evidence (20 sec):} Same IDs, publication dates and original source links show karo.
   \item \textbf{Critical review (15 sec):} Weak claims and missing evidence show karo.
@@ -1093,7 +1093,7 @@ Live APIs unpredictable hote hain. Interview se pehle ek successful result ready
 
 \begin{itemize}
   \item Built and deployed an evidence-first multi-agent research platform that synthesizes recent scholarly and news sources into citation-mapped trend reports.
-  \item Designed a five-stage workflow with research strategy, concurrent evidence collection, trend analysis, cross-provider adversarial review, and final synthesis.
+  \item Upgraded a tutorial-based four-stage Search--Reader--Writer--Critic workflow with concurrent evidence collection, source IDs, and cross-provider review.
   \item Implemented automatic Gemini/Groq routing, single-provider fallback, context budgeting, and compact retry to handle model and rate limits.
   \item Reduced source collection latency through concurrent I/O and improved resilience with per-source timeouts, error isolation, deduplication, and stable source IDs.
   \item Shipped a responsive Streamlit UI with evidence library, progress tracking, follow-up Q\&A, Markdown export, Docker health checks, and cloud secrets support.
@@ -1179,7 +1179,7 @@ Main limitation & Snippet-level evidence and no deterministic citation entailmen
 
 \begin{enumerate}
   \item ``I separate deterministic retrieval from probabilistic reasoning.''
-  \item ``The final writer consumes the adversarial review, so critique affects the published answer.''
+  \item ``The Critic independently audits the completed report; an optional revision loop is the next improvement.''
   \item ``Citations are traceable IDs, but I do not claim that traceability alone guarantees truth.''
   \item ``I parallelized independent I/O and kept dependent reasoning sequential.''
   \item ``The next production improvement is automated claim-citation verification and persistent async jobs.''

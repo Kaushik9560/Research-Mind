@@ -1,29 +1,40 @@
 # InsightForge
 
-InsightForge is a multi-agent research intelligence workspace for researchers,
+InsightForge is a tutorial-shaped multi-agent research workspace for researchers,
 students, founders, policy teams, and anyone exploring a fast-moving domain. It
-collects recent evidence, separates established trends from early signals,
-challenges weak claims, and produces a source-mapped report.
+keeps the original project's simple Search → Reader → Writer → Critic flow while
+adding live academic/news evidence, citations, model routing, and deployment.
 
 ## Research workflow
 
-1. **Research Strategist** scopes the question and defines evidence criteria.
-2. **Evidence Collector** searches recent OpenAlex papers and Google News. It can
-   also search the general web when a Tavily key is configured.
-3. **Trend Analyst** identifies established trends, emerging signals, drivers,
-   counter-signals, and gaps.
-4. **Skeptic Agent** checks the analysis for bias, contradictions, and claims that
-   exceed the evidence.
-5. **Lead Researcher** writes the final cited report.
+1. **Search Agent** scopes the question and searches OpenAlex, Google News, and
+   optional Tavily web results.
+2. **Reader Agent** reads all retrieved abstracts/snippets and compares findings,
+   recent signals, disagreements, and evidence gaps.
+3. **Writer Chain** uses the familiar `prompt | llm | output parser` pattern to
+   create the cited report.
+4. **Critic Chain** scores the report and highlights unsupported or overstated
+   claims.
 
 When both Google and Groq keys are configured, InsightForge routes evidence-heavy
-analysis to Gemini and the adversarial review to Groq. Quick scans reverse the
-route for speed. If only one provider is available, the full workflow uses it
-automatically.
+reading and writing to Gemini and the independent critic to Groq. Quick scans
+reverse the route for speed. If only one provider is available, the entire flow
+uses it automatically.
 
-Every collected source receives a stable ID such as `[S3]`. The report, trend
-radar, adversarial review, evidence library, and full audit trail remain visible
-and can be exported as Markdown.
+Every collected source receives a stable ID such as `[S3]`. The report, Reader
+notes, Critic feedback, evidence library, and complete four-stage audit trail
+remain visible and can be exported as Markdown.
+
+## How this extends the tutorial
+
+| Tutorial concept | Production upgrade |
+|---|---|
+| Tavily search results | OpenAlex + Google News + optional Tavily |
+| Reader scrapes one URL | Reader compares every retrieved record |
+| One OpenAI model | Automatic Gemini/Groq/OpenAI fallback |
+| Writer report | Source-ID-grounded report with uncertainty |
+| Critic score | Citation and bias review using an independent provider |
+| Terminal output | Responsive Streamlit UI and downloadable audit trail |
 
 ## Run locally
 

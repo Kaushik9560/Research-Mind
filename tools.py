@@ -194,3 +194,34 @@ def format_evidence(records: list[dict[str, Any]]) -> str:
         details.append(f"Excerpt: {item.get('summary') or 'No abstract/snippet available.'}")
         blocks.append("\n".join(details))
     return "\n\n---\n\n".join(blocks)
+
+
+# ---------------------------------------------------------------------------
+# Tutorial-compatible tool names
+# ---------------------------------------------------------------------------
+def web_search(query: str) -> str:
+    """Search live sources and return readable results, like the video tool.
+
+    The deployed pipeline calls ``collect_evidence`` directly because it also
+    needs structured source cards. This wrapper keeps the original learning API
+    available for experiments in a notebook or Python shell.
+    """
+    records, warnings = collect_evidence(query, days=365, per_source=5)
+    warning_text = "\n".join(f"Warning: {warning}" for warning in warnings)
+    return "\n\n".join(part for part in (format_evidence(records), warning_text) if part)
+
+
+def scrape_url(url: str) -> str:
+    """Return bounded page text using the original tutorial tool signature."""
+    try:
+        response = requests.get(
+            url,
+            timeout=12,
+            headers={"User-Agent": USER_AGENT},
+        )
+        response.raise_for_status()
+        html = re.sub(r"<script[\s\S]*?</script>", " ", response.text, flags=re.I)
+        html = re.sub(r"<style[\s\S]*?</style>", " ", html, flags=re.I)
+        return _clean(html, 3000)
+    except requests.RequestException as exc:
+        return f"Could not scrape URL ({exc.__class__.__name__})."

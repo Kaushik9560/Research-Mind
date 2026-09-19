@@ -92,7 +92,7 @@ html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
 .stFormSubmitButton button:hover { background:var(--brand-dark) !important; border-color:var(--brand-dark) !important; }
 .stDownloadButton button { background:var(--accent) !important; border-color:var(--accent) !important; color:var(--ink) !important; }
 
-.agent-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:.65rem; margin:1.1rem 0 0; }
+.agent-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.65rem; margin:1.1rem 0 0; }
 .agent-card { padding:.9rem .8rem; background:var(--card); border:1px solid var(--line); border-radius:13px; }
 .agent-number { color:var(--brand); font:800 .68rem 'Manrope',sans-serif; }
 .agent-name { margin:.3rem 0 .12rem; color:var(--ink); font-weight:700; font-size:.82rem; }
@@ -124,14 +124,12 @@ html, body, [class*="css"] { font-family: 'DM Sans', sans-serif; }
     .hero p { font-size:.92rem; }
     [data-testid="stForm"] { padding:1rem; border-radius:15px; }
     .agent-grid { grid-template-columns:repeat(2,1fr); }
-    .agent-card:last-child { grid-column:1 / -1; }
     .metrics { grid-template-columns:repeat(2,1fr); }
 }
 
 @media (max-width: 420px) {
     .hero h1 { font-size:2.05rem; }
     .agent-grid { grid-template-columns:1fr; }
-    .agent-card:last-child { grid-column:auto; }
 }
 </style>
 """,
@@ -148,11 +146,10 @@ PERIODS = {
 }
 
 AGENTS = {
-    "strategist": ("01", "Strategist", "Scopes the question"),
-    "collector": ("02", "Collector", "Finds live evidence"),
-    "analyst": ("03", "Analyst", "Maps the trends"),
-    "skeptic": ("04", "Skeptic", "Tests weak claims"),
-    "writer": ("05", "Researcher", "Writes the brief"),
+    "search": ("01", "Search Agent", "Plans and finds live sources"),
+    "reader": ("02", "Reader Agent", "Reads and compares evidence"),
+    "writer": ("03", "Writer Chain", "Writes the cited report"),
+    "critic": ("04", "Critic Chain", "Reviews weak claims"),
 }
 
 for state_key, default in {
@@ -173,7 +170,7 @@ st.markdown(
 <div class="hero">
   <div class="eyebrow">Multi-agent research intelligence</div>
   <h1>Research any domain.<br><span>See what is changing.</span></h1>
-  <p>Turn recent papers and news into a cited research brief—with trend analysis, counter-evidence, and clear uncertainty.</p>
+  <p>Search live sources, read the evidence, write a cited brief, and critically review every important claim.</p>
 </div>
 """,
     unsafe_allow_html=True,
@@ -308,7 +305,7 @@ if result:
   <div class="metric"><strong>{len(evidence)}</strong><span>Total sources</span></div>
   <div class="metric"><strong>{counts.get('Academic', 0)}</strong><span>Academic papers</span></div>
   <div class="metric"><strong>{counts.get('News', 0) + counts.get('Web', 0)}</strong><span>Current signals</span></div>
-  <div class="metric"><strong>5</strong><span>Agent checks</span></div>
+  <div class="metric"><strong>4</strong><span>Pipeline stages</span></div>
 </div>
 """,
         unsafe_allow_html=True,
@@ -319,8 +316,8 @@ if result:
     if not evidence:
         st.warning("No live sources matched. Try broader wording or a longer time range.")
 
-    report_tab, trends_tab, evidence_tab, review_tab, method_tab = st.tabs(
-        ["Brief", "Trends", "Evidence", "Critical review", "Method"]
+    report_tab, reader_tab, evidence_tab, review_tab, method_tab = st.tabs(
+        ["Report", "Reader notes", "Sources", "Critic feedback", "Search plan"]
     )
 
     with report_tab:
@@ -332,8 +329,8 @@ if result:
             mime="text/markdown",
         )
 
-    with trends_tab:
-        st.markdown(result.get("trends", ""))
+    with reader_tab:
+        st.markdown(result.get("reader_notes", ""))
 
     with evidence_tab:
         if evidence:
@@ -366,11 +363,11 @@ if result:
             st.info("No evidence records are available for this run.")
 
     with review_tab:
-        st.markdown(result.get("challenge", ""))
+        st.markdown(result.get("feedback", ""))
 
     with method_tab:
-        st.markdown("### Research strategy")
-        st.markdown(result.get("strategy", ""))
+        st.markdown("### Search Agent plan")
+        st.markdown(result.get("search_plan", ""))
         model_plan = result.get("model_plan", {})
         if isinstance(model_plan, dict):
             st.caption(
@@ -395,7 +392,7 @@ if result:
         research_context = "\n\n".join(
             [
                 str(result.get("report", "")),
-                str(result.get("challenge", "")),
+                str(result.get("feedback", "")),
                 format_evidence(evidence),
             ]
         )

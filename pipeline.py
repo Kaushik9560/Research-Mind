@@ -1,4 +1,4 @@
-"""Orchestrates InsightForge's strategy, evidence and synthesis agents."""
+"""Run the tutorial's four-step research flow with production upgrades."""
 
 from __future__ import annotations
 
@@ -8,17 +8,20 @@ from datetime import date
 from typing import Callable
 
 from agents import (
-    analyze_trends,
-    build_research_strategy,
-    challenge_analysis,
+    build_critic_chain,
+    build_reader_agent,
+    build_search_agent,
+    build_writer_chain,
+    invoke_chain,
     research_provider_plan,
-    synthesize_report,
 )
 from tools import collect_evidence, format_evidence
 
 
 @dataclass(frozen=True)
 class ResearchRequest:
+    """Everything the four stages need to understand the user's request."""
+
     question: str
     domain: str = "General"
     days: int = 365
@@ -59,7 +62,7 @@ def _source_limit(depth: str) -> int:
 
 
 def _build_search_query(question: str, domain: str, region: str) -> str:
-    """Convert prose questions into terms that source indexes match reliably."""
+    """Turn a natural-language question into terms source APIs match well."""
     stopwords = {
         "a", "an", "and", "are", "as", "at", "be", "by", "for", "from",
         "how", "in", "is", "it", "latest", "of", "on", "recent", "the",
@@ -74,25 +77,35 @@ def _build_search_query(question: str, domain: str, region: str) -> str:
             if token not in stopwords and token not in terms:
                 terms.append(token)
     if region.lower() != "global":
-        terms.extend(token for token in re.findall(r"[A-Za-z0-9]+", region.lower()) if token not in terms)
+        terms.extend(
+            token
+            for token in re.findall(r"[A-Za-z0-9]+", region.lower())
+            if token not in terms
+        )
     return " ".join(terms[:12]) or question
 
 
 def run_research_pipeline(
-    request: ResearchRequest,
+    request: ResearchRequest | str,
     on_progress: ProgressCallback | None = None,
 ) -> dict[str, object]:
-    """Run the complete, inspectable multi-agent research workflow."""
+    """Execute Search Agent -> Reader Agent -> Writer Chain -> Critic Chain.
+
+    A plain topic string is accepted for compatibility with the original video.
+    The Streamlit app passes a richer ``ResearchRequest`` instead.
+    """
+    if isinstance(request, str):
+        request = ResearchRequest(question=request)
+
     state: dict[str, object] = {"request": asdict(request)}
     profile = request.to_prompt()
     model_plan = research_provider_plan(request.depth)
     state["model_plan"] = model_plan
 
-    _notify(on_progress, "strategist", "running")
-    state["strategy"] = build_research_strategy(profile, model_plan["primary"])
-    _notify(on_progress, "strategist", "done")
-
-    _notify(on_progress, "collector", "running")
+    # Step 1 - Search Agent: create the search plan, then run live source tools.
+    _notify(on_progress, "search", "running")
+    search_agent = build_search_agent(model_plan["primary"])
+    state["search_plan"] = invoke_chain(search_agent, {"profile": profile})
     query = _build_search_query(request.question, request.domain, request.region)
     state["search_query"] = query
     evidence, warnings = collect_evidence(
@@ -106,41 +119,54 @@ def run_research_pipeline(
     state["evidence"] = evidence
     state["warnings"] = warnings
     evidence_text = format_evidence(evidence)
-    _notify(on_progress, "collector", "done")
+    # This familiar key makes comparison with the tutorial pipeline immediate.
+    state["search_results"] = evidence_text
+    _notify(on_progress, "search", "done")
 
-    _notify(on_progress, "analyst", "running")
-    state["trends"] = analyze_trends(
-        profile,
-        str(state["strategy"]),
-        evidence_text,
-        model_plan["primary"],
+    # Step 2 - Reader Agent: read all records instead of one fragile scraped URL.
+    _notify(on_progress, "reader", "running")
+    reader_agent = build_reader_agent(model_plan["primary"])
+    state["reader_notes"] = invoke_chain(
+        reader_agent,
+        {
+            "profile": profile,
+            "search_plan": str(state["search_plan"])[:3000],
+            "evidence": evidence_text[:12000],
+        },
     )
-    _notify(on_progress, "analyst", "done")
+    state["scraped_content"] = state["reader_notes"]
+    _notify(on_progress, "reader", "done")
 
-    _notify(on_progress, "skeptic", "running")
-    state["challenge"] = challenge_analysis(
-        profile,
-        str(state["trends"]),
-        evidence_text,
-        model_plan["reviewer"],
-    )
-    _notify(on_progress, "skeptic", "done")
-
+    # Step 3 - Writer Chain: same prompt | llm | parser pattern as the tutorial.
     _notify(on_progress, "writer", "running")
-    state["report"] = synthesize_report(
-        profile,
-        str(state["strategy"]),
-        str(state["trends"]),
-        str(state["challenge"]),
-        evidence_text,
-        model_plan["primary"],
+    writer_chain = build_writer_chain(model_plan["primary"])
+    state["report"] = invoke_chain(
+        writer_chain,
+        {
+            "profile": profile,
+            "research": str(state["reader_notes"])[:6000],
+            "evidence": evidence_text[:9000],
+            "language": request.language,
+        },
     )
     _notify(on_progress, "writer", "done")
+
+    # Step 4 - Critic Chain: use another provider when both keys are available.
+    _notify(on_progress, "critic", "running")
+    critic_chain = build_critic_chain(model_plan["reviewer"])
+    state["feedback"] = invoke_chain(
+        critic_chain,
+        {
+            "report": str(state["report"])[:7000],
+            "evidence": evidence_text[:7000],
+        },
+    )
+    _notify(on_progress, "critic", "done")
     return state
 
 
 def export_markdown(state: dict[str, object]) -> str:
-    """Build a portable report that retains its source mapping and audit trail."""
+    """Export the report, source library, and four-stage learning trail."""
     request = state.get("request", {})
     evidence = state.get("evidence", [])
     lines = [str(state.get("report", "")), "", "---", "", "# Evidence library", ""]
@@ -160,16 +186,19 @@ def export_markdown(state: dict[str, object]) -> str:
         [
             "---",
             "",
-            "# Research audit trail",
+            "# Four-stage audit trail",
             "",
-            "## Strategy",
-            str(state.get("strategy", "")),
+            "## 1. Search Agent plan",
+            str(state.get("search_plan", "")),
             "",
-            "## Trend analysis",
-            str(state.get("trends", "")),
+            "## 2. Reader Agent notes",
+            str(state.get("reader_notes", "")),
             "",
-            "## Adversarial review",
-            str(state.get("challenge", "")),
+            "## 3. Writer Chain report",
+            str(state.get("report", "")),
+            "",
+            "## 4. Critic Chain feedback",
+            str(state.get("feedback", "")),
             "",
             f"_Generated for: {request.get('question', 'Research request') if isinstance(request, dict) else 'Research request'}_",
         ]
@@ -178,6 +207,7 @@ def export_markdown(state: dict[str, object]) -> str:
 
 
 if __name__ == "__main__":
-    question = input("Research question: ").strip()
-    result = run_research_pipeline(ResearchRequest(question=question))
+    topic = input("Research topic: ").strip()
+    result = run_research_pipeline(topic)
     print("\n", result["report"])
+    print("\nCRITIC FEEDBACK\n", result["feedback"])
