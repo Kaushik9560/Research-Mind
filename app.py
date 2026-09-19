@@ -25,7 +25,6 @@ for secret_name in (
     "MAX_OUTPUT_TOKENS",
     "GOOGLE_API_KEY",
     "GOOGLE_MODEL",
-    "OPENAI_API_KEY",
     "TAVILY_API_KEY",
 ):
     try:
@@ -35,7 +34,7 @@ for secret_name in (
         break
 
 from agents import ModelConfigurationError, answer_follow_up, provider_name  # noqa: E402
-from pipeline import ResearchRequest, export_markdown, run_research_pipeline  # noqa: E402
+from pipeline import export_markdown, run_research_pipeline  # noqa: E402
 from tools import format_evidence  # noqa: E402
 
 
@@ -246,19 +245,6 @@ if submitted:
     elif not any((use_academic, use_news, use_web)):
         st.warning("Select at least one source under More options.")
     else:
-        research_request = ResearchRequest(
-            question=question.strip(),
-            domain=domain.strip() or "General",
-            days=PERIODS[period_label],
-            period_label=period_label,
-            region=region.strip() or "Global",
-            audience=audience,
-            depth=depth,
-            language=language,
-            use_academic=use_academic,
-            use_news=use_news,
-            use_web=use_web,
-        )
         st.session_state.followups = []
 
         with st.status("Starting the research team…", expanded=True) as status:
@@ -275,7 +261,20 @@ if submitted:
                     progress_bar.progress((position + 1) / len(AGENTS))
 
             try:
-                output = run_research_pipeline(research_request, on_progress=show_progress)
+                output = run_research_pipeline(
+                    topic=question.strip(),
+                    days=PERIODS[period_label],
+                    period=period_label,
+                    domain=domain.strip() or "General",
+                    region=region.strip() or "Global",
+                    audience=audience,
+                    depth=depth,
+                    language=language,
+                    use_academic=use_academic,
+                    use_news=use_news,
+                    use_web=use_web,
+                    on_progress=show_progress,
+                )
                 st.session_state.research_result = output
                 progress_text.markdown("**Done** — Your cited report is ready.")
                 status.update(label="Research complete", state="complete", expanded=False)
@@ -330,7 +329,7 @@ if result:
         )
 
     with reader_tab:
-        st.markdown(result.get("reader_notes", ""))
+        st.markdown(result.get("scraped_content", ""))
 
     with evidence_tab:
         if evidence:
@@ -368,11 +367,11 @@ if result:
     with method_tab:
         st.markdown("### Search Agent plan")
         st.markdown(result.get("search_plan", ""))
-        model_plan = result.get("model_plan", {})
-        if isinstance(model_plan, dict):
+        models = result.get("models", {})
+        if isinstance(models, dict):
             st.caption(
-                f"Automatic model routing: {model_plan.get('primary', 'Auto')} synthesis · "
-                f"{model_plan.get('reviewer', 'Auto')} independent review"
+                f"{models.get('research', 'Gemini')} research · "
+                f"{models.get('critic', 'Gemini')} critic"
             )
         with st.expander("Run configuration"):
             if isinstance(request_data, dict):
@@ -405,9 +404,6 @@ if result:
                         str(request_data.get("language", "English"))
                         if isinstance(request_data, dict)
                         else "English",
-                        str(result.get("model_plan", {}).get("primary", "Auto"))
-                        if isinstance(result.get("model_plan"), dict)
-                        else "Auto",
                     )
                 except Exception:
                     answer = "I could not answer that follow-up. Please try again."

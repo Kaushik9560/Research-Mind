@@ -3,7 +3,7 @@
 InsightForge is a tutorial-shaped multi-agent research workspace for researchers,
 students, founders, policy teams, and anyone exploring a fast-moving domain. It
 keeps the original project's simple Search → Reader → Writer → Critic flow while
-adding live academic/news evidence, citations, model routing, and deployment.
+adding live academic/news evidence, citations, a second-model critic, and deployment.
 
 ## Research workflow
 
@@ -16,10 +16,9 @@ adding live academic/news evidence, citations, model routing, and deployment.
 4. **Critic Chain** scores the report and highlights unsupported or overstated
    claims.
 
-When both Google and Groq keys are configured, InsightForge routes evidence-heavy
-reading and writing to Gemini and the independent critic to Groq. Quick scans
-reverse the route for speed. If only one provider is available, the entire flow
-uses it automatically.
+Gemini performs the Search, Reader, and Writer stages. Groq performs the Critic
+stage when its key is present; otherwise Gemini reviews its own report. This is
+the only model fallback in the project.
 
 Every collected source receives a stable ID such as `[S3]`. The report, Reader
 notes, Critic feedback, evidence library, and complete four-stage audit trail
@@ -31,7 +30,7 @@ remain visible and can be exported as Markdown.
 |---|---|
 | Tavily search results | OpenAlex + Google News + optional Tavily |
 | Reader scrapes one URL | Reader compares every retrieved record |
-| One OpenAI model | Automatic Gemini/Groq/OpenAI fallback |
+| One OpenAI model | Gemini research + optional Groq critic |
 | Writer report | Source-ID-grounded report with uncertainty |
 | Critic score | Citation and bias review using an independent provider |
 | Terminal output | Responsive Streamlit UI and downloadable audit trail |
@@ -44,7 +43,7 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# Add at least one supported model key to .env
+# Add GOOGLE_API_KEY; GROQ_API_KEY is optional
 streamlit run app.py
 ```
 

@@ -122,7 +122,7 @@
       \textbf{Problem} \(\rightarrow\) \textbf{Evidence collection} \(\rightarrow\)
       \textbf{Multi-agent analysis} \(\rightarrow\) \textbf{Cited report}\\[3mm]
       OpenAlex + Google News + optional Tavily\\
-      Gemini + Groq automatic model routing\\
+      Gemini research + optional Groq critic\\
       Streamlit + LangChain + Docker + Streamlit Cloud
     \end{tcolorbox}
 
@@ -161,21 +161,21 @@ InsightForge is gap ko evidence-first workflow aur specialized agents se solve k
 \subsection{English elevator pitch}
 
 \begin{answerbox}
-``I started with a tutorial-based Search, Reader, Writer, and Critic workflow, then upgraded each stage for real-world research. The Search Agent uses live academic and news sources, the Reader compares all retrieved evidence, the Writer produces a source-ID-grounded report, and the Critic independently checks weak claims. Gemini and Groq are routed automatically with a single-provider fallback.''
+``I started with a tutorial-based Search, Reader, Writer, and Critic workflow, then upgraded it with live academic and news sources, source IDs, a responsive UI, and deployment support. Gemini handles the first three stages and Groq provides an optional independent Critic.''
 \end{answerbox}
 
 \subsection{Hinglish elevator pitch}
 
 \begin{answerbox}
-``Maine tutorial ke Search Agent, Reader Agent, Writer Chain aur Critic Chain ko base rakha. Search stage live papers/news laati hai, Reader saare evidence compare karta hai, Writer cited report banata hai aur Critic weak claims check karta hai. Iske upar maine Gemini/Groq routing, source IDs, responsive UI aur deployment add kiya.''
+``Maine tutorial ke Search Agent, Reader Agent, Writer Chain aur Critic Chain ko base rakha. Search live papers/news laata hai, Reader evidence compare karta hai, Writer cited report banata hai aur Groq Critic weak claims check karta hai. Code ko jaan-boojhkar direct aur interview-friendly rakha hai.''
 \end{answerbox}
 
 \subsection{Project ke strongest differentiators}
 
 \begin{enumerate}
   \item \textbf{Live evidence, not model memory only.}
-  \item \textbf{Adversarial review} final report se pehle hota hai.
-  \item \textbf{Multi-provider routing} quality aur independence improve karta hai.
+  \item \textbf{Independent review:} Groq available ho to completed report ko separately check karta hai.
+  \item \textbf{Simple model rule:} Gemini research, Groq critic; no routing matrix.
   \item \textbf{Stable source IDs} report ko auditable banate hain.
   \item \textbf{Graceful degradation:} source ya provider fail ho to poora app unnecessarily crash nahi karta.
   \item \textbf{Production readiness:} responsive UI, secrets, Docker, health check, deployment guide.
@@ -195,7 +195,7 @@ Original repository ek basic multi-agent research demo tha. Usmein broadly chaar
   \item Critic Chain score aur feedback deti thi.
 \end{itemize}
 
-Yeh learning demo achha tha, lekin real product ke liye limitations thi: Tavily key compulsory jaisi dependency, single scraped page, generic report, no strong evidence library, no source IDs, critic feedback final answer ko improve nahi karta tha, no token budgeting, no provider fallback, aur UI zyada demo-like thi.
+Yeh learning demo achha tha, lekin real product ke liye limitations thi: Tavily dependency, single scraped page, generic report, no strong evidence library, no source IDs, aur demo-like UI.
 
 \subsection{Idea pivots aur final requirement}
 
@@ -226,10 +226,10 @@ Step & File / concern & Kya banaya gaya \\
 1 & Product scope & Generic report generator ko universal research intelligence product define kiya. \\
 2 & \file{agents.py} & Original two-agent/two-chain contract preserve karke grounded prompts aur provider abstraction add ki. \\
 3 & \file{tools.py} & OpenAlex, Google News RSS aur optional Tavily collectors banaye. \\
-4 & \file{pipeline.py} & Original four sequential stages, familiar state keys, typed request and progress callback banaye. \\
+4 & \file{pipeline.py} & Original four sequential stages, simple dictionary state and progress callback banaye. \\
 5 & \file{app.py} & Responsive Streamlit experience, progress, tabs, evidence cards aur follow-up chat banaya. \\
-6 & Reliability & Query normalization, timeouts, deduplication, context clipping aur 413 retry add hua. \\
-7 & Model routing & Gemini/Groq automatic stage routing aur fallback add hua. \\
+6 & Reliability & Query normalization, source timeouts, bounded snippets and deduplication add hue. \\
+7 & Models & Simple rule rakha: Gemini research aur optional Groq critic. \\
 8 & Deployment & Requirements, secrets examples, Streamlit config, Dockerfile, runtime and docs add hue. \\
 9 & Verification & Syntax, utility, live source, full pipeline, health endpoint aur AppTest checks hue. \\
 \bottomrule
@@ -262,7 +262,7 @@ Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: tu
   \item API keys source control se bahar.
   \item Token/rate-limit aware prompts.
   \item Traceability through source IDs.
-  \item Multiple model providers and graceful fallback.
+  \item Simple, explainable model selection.
   \item Local, Streamlit Cloud and Docker deployment.
 \end{itemize}
 
@@ -295,9 +295,9 @@ Agar interviewer pooche ``pehli file kaunsi banayi?'', honest answer yeh hai: tu
 
 \subsection{Why sequential pipeline?}
 
-Stages ka order tutorial jaisa dependency-driven hai. Reader ko Search results chahiye, Writer ko Reader notes chahiye, aur Critic ko completed report chahiye. Isliye core reasoning sequential hai. Search stage ke independent OpenAlex, News aur Tavily calls parallel run karte hain.
+Stages ka order tutorial jaisa dependency-driven hai. Reader ko Search results chahiye, Writer ko Reader notes chahiye, aur Critic ko completed report chahiye. Simplicity ke liye source calls bhi seedhe one-by-one run hote hain.
 
-\interview{I parallelized I/O-bound collectors, but kept dependent reasoning stages sequential because each stage consumes the previous stage's artifact.}
+\interview{I kept the pipeline deliberately sequential so its execution order is obvious in an interview and easy to debug.}
 
 % -----------------------------------------------------------------------------
 \section{Technology Stack: Kya Use Kiya Aur Kyun}
@@ -314,7 +314,6 @@ Academic source & OpenAlex REST API & Recent scholarly metadata, abstracts, auth
 News source & Google News RSS & Recent reporting through RSS/XML without a dedicated paid key. \\
 Optional web source & Tavily API & General web snippets for domains not fully covered by papers/news. \\
 HTTP/XML & Requests + ElementTree & Lightweight network calls and standard-library RSS parsing. \\
-Concurrency & ThreadPoolExecutor & Academic/news/web calls are I/O-bound and independent. \\
 Configuration & python-dotenv + st.secrets & Same application works locally and on Streamlit Cloud. \\
 Packaging & requirements.txt & Reproducible Python dependencies. \\
 Deployment & Streamlit Cloud + Docker & Easy public hosting plus portable container option. \\
@@ -333,52 +332,30 @@ Current workflow ek fixed DAG hai without looping, human approval, checkpointing
 
 \subsection{\texorpdfstring{\texttt{agents.py}}{agents.py}: intelligence layer}
 
-Is file ki responsibilities:
+Is file ko original project ki tarah direct rakha gaya hai:
 
 \begin{enumerate}
   \item Environment variables load karna.
-  \item Requested provider validate karna.
-  \item Gemini, Groq and OpenAI client construct aur cache karna.
-  \item Automatic primary/reviewer plan choose karna.
-  \item Prompt template ko model aur string parser se compose karna.
-  \item Oversized context ko clip aur 413 par compact retry karna.
-  \item Tutorial ke Search, Reader, Writer aur Critic prompts define karna.
+  \item Gemini main model aur optional Groq critic banana.
+  \item Four prompt templates define karna.
+  \item Har prompt ko \code{prompt | model | StrOutputParser()} chain mein badalna.
+  \item Evidence-bound follow-up answer banana.
 \end{enumerate}
 
-\subsubsection{Provider resolution}
+\subsubsection{Simple model setup}
 
-Explicit provider diya ho to corresponding API key validate hoti hai. Auto mode fallback order support karta hai. Model client \code{@lru_cache} se reuse hota hai, isliye har agent stage naya HTTP client unnecessarily construct nahi karta.
+Project mein koi provider routing matrix nahi hai. Gemini Search, Reader aur Writer chalata hai. Groq key ho to Groq Critic chalata hai; key na ho to Gemini Critic bhi chala deta hai. Yeh ek hi simple fallback hai.
 
-\begin{lstlisting}[language=Python,caption={Simplified provider client factory}]
-@lru_cache(maxsize=6)
-def _build_llm(provider, model, max_tokens):
-    if provider == "groq":
-        return ChatGroq(model=model, temperature=0.15,
-                        max_tokens=max_tokens)
-    if provider == "google":
-        return ChatGoogleGenerativeAI(
-            model=model, temperature=0.15,
-            max_output_tokens=max_tokens)
+\begin{lstlisting}[language=Python,caption={Actual model selection idea}]
+main_model = ChatGoogleGenerativeAI(...)
+
+if GROQ_API_KEY:
+    critic_model = ChatGroq(...)
+else:
+    critic_model = main_model
 \end{lstlisting}
 
-\subsubsection{Automatic routing}
-
-\begin{center}
-\begin{tabularx}{.92\textwidth}{lXX}
-\toprule
-Condition & Primary stages & Reviewer stage \\
-\midrule
-Gemini + Groq, Quick scan & Groq for speed & Gemini \\
-Gemini + Groq, Standard/Deep & Gemini for evidence-heavy synthesis & Groq \\
-Only Gemini & Gemini & Gemini \\
-Only Groq & Groq & Groq \\
-Only OpenAI & OpenAI & OpenAI \\
-No provider & Clear configuration error & -- \\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-Why two providers? Same model ko apna answer criticize karwana useful hai, lekin independent model se review diversity badhti hai. Yeh correctness guarantee nahi hai, but correlated blind spots reduce kar sakta hai.
+Why optional second provider? Independent Critic useful hai, but application ko samajhne ke liye complex router zaroori nahi. Interview answer seedha hai: ``Gemini research karta hai; Groq report review karta hai.''
 
 \subsubsection{Prompt design principles}
 
@@ -387,18 +364,9 @@ Why two providers? Same model ko apna answer criticize karwana useful hai, lekin
   \item Input sections named: request, search plan, evidence, reader notes and report.
   \item Output structure fixed using Markdown headings.
   \item Evidence boundary explicit: only \code{[S3]} style supplied IDs cite karo.
-  \item Retrieved text ko untrusted data treat karo; embedded instructions ignore karo.
   \item Uncertainty aur insufficient evidence clearly state karo.
   \item Temperature \code{0.15}: creative prose se zyada stable analytical output.
 \end{itemize}
-
-\subsubsection{Context clipping and retry}
-
-\code{_clip()} long string ka approximately 72\% beginning aur remaining tail preserve karta hai. Middle ke place marker insert hota hai. Beginning mein definitions/evidence aur tail mein conclusions often useful hote hain. Agar provider still HTTP 413 ``request too large'' return kare, \code{invoke_chain()} values ko approximately 55\% size par compact karke exactly one retry karta hai.
-
-\begin{keybox}[Why exactly one retry?]
-Unlimited retry loop cost aur latency explode kar sakta hai. 413 deterministic sizing error hai; one smaller retry rational hai. Authentication ya general 429 error ko same logic se blindly retry nahi kiya gaya.
-\end{keybox}
 
 \subsection{\texorpdfstring{\texttt{tools.py}}{tools.py}: live evidence layer}
 
@@ -430,25 +398,14 @@ Query mein \code{when:Nd} add hota hai. XML response ko \code{ElementTree} parse
 
 \code{TAVILY_API_KEY} present ho tabhi job schedule hoti hai. Yeh general web coverage deta hai. Key absent ho to academic/news pipeline normally chalti rehti hai.
 
-\subsubsection{Concurrent collection}
+\subsubsection{Straightforward collection}
 
-\begin{lstlisting}[language=Python,caption={I/O-bound search jobs run concurrently}]
-with ThreadPoolExecutor(max_workers=max(1, len(jobs))) as pool:
-    futures = {pool.submit(func, *args): name
-               for name, func, args in jobs}
-    for future in as_completed(futures):
-        try:
-            records.extend(future.result())
-        except expected_network_errors as exc:
-            warnings.append(...)
-\end{lstlisting}
-
-Benefits:
+Search functions ek simple loop mein run hote hain. Har selected source ka function call visible hai, isliye beginner easily debug kar sakta hai.
 
 \begin{itemize}
-  \item Total latency roughly slowest source ke closer hoti hai, sum of all sources ke nahi.
   \item Ek source fail ho to baaki evidence retain hota hai.
-  \item Expected exceptions warnings banti hain; unexpected programming errors silently hide nahi hote.
+  \item Error short warning mein convert hota hai.
+  \item Trade-off: parallel version se thodi zyada latency ho sakti hai, lekin code ka learning cost kam hai.
 \end{itemize}
 
 \subsubsection{Cleaning, deduplication and IDs}
@@ -457,24 +414,13 @@ HTML tags and repeated whitespace remove hote hain. Summary 500 characters tak b
 
 \subsection{\texorpdfstring{\texttt{pipeline.py}}{pipeline.py}: orchestration layer}
 
-\subsubsection{Typed immutable request}
+\subsubsection{Simple function arguments}
 
-\code{ResearchRequest} ek frozen dataclass hai. Isse:
-
-\begin{itemize}
-  \item expected fields explicit hote hain;
-  \item defaults centralized rehte hain;
-  \item request accidental mutation se protected hoti hai;
-  \item \code{asdict()} se state/export easy hota hai.
-\end{itemize}
-
-Fields: question, domain, days, period label, region, audience, depth, language, and source toggles.
-
-Pipeline plain topic string bhi accept karti hai. Isliye video wala call ab bhi valid mental model hai:
+Dataclass aur request adapters remove kar diye gaye. Main function seedhe topic aur optional form values leta hai:
 \begin{center}
 \code{run\_research\_pipeline(topic)}
 \end{center}
-Streamlit richer configuration ke liye \code{ResearchRequest} pass karta hai.
+Time range, domain, language aur source toggles normal keyword arguments hain. Yeh original video ke call ke sabse close hai.
 
 \subsubsection{Query normalization}
 
@@ -495,11 +441,10 @@ Pipeline ek dictionary mein inspectable artifacts rakhti hai:
 \begin{lstlisting}[language=Python]
 state = {
     "request": {...},
-    "model_plan": {"primary": "Gemini", "reviewer": "Groq"},
+    "models": {"research": "Gemini", "critic": "Groq"},
     "search_plan": "...",
     "search_results": "...",
     "evidence": [...],
-    "reader_notes": "...",
     "scraped_content": "...",
     "report": "...",
     "feedback": "..."
@@ -592,11 +537,11 @@ Tutorial order preserve karne ke liye Critic completed report ke baad feedback d
 \begin{enumerate}
   \item User form fill karke \textbf{Start research} click karta hai.
   \item App empty question and empty source selection validate karti hai.
-  \item UI values se immutable \code{ResearchRequest} banta hai.
-  \item Pipeline depth ke basis par provider plan select karti hai.
+  \item UI values direct pipeline function arguments bante hain.
+  \item Pipeline Gemini main model aur optional Groq critic banati hai.
   \item Search Agent question ko scope karta hai aur plan banata hai.
   \item Natural question keyword query mein normalize hoti hai.
-  \item Search stage ke selected collectors parallel run karte hain.
+  \item Search stage selected source functions one-by-one call karti hai.
   \item Records clean, deduplicate and source-ID assign hote hain.
   \item Reader Agent saare bounded records compare karke research notes banata hai.
   \item Writer Chain notes + evidence se cited report banati hai.
@@ -611,9 +556,9 @@ Tutorial order preserve karne ke liye Critic completed report ke baad feedback d
 \begin{center}
 \begin{tabular}{lcc}
 \toprule
-Depth & Per selected source limit & Default primary when Gemini+Groq \\
+Depth & Per selected source limit & Research model \\
 \midrule
-Quick scan & 4 & Groq \\
+Quick scan & 4 & Gemini \\
 Standard & 6 & Gemini \\
 Deep dive & 8 & Gemini \\
 \bottomrule
@@ -675,14 +620,13 @@ Retrieved snippets untrusted hain. System prompt explicitly bolta hai: evidence 
   \item Output tokens 1400 cap.
   \item Per-source excerpt 500 chars.
   \item Quick/Standard/Deep source limits reduce.
-  \item Agent-specific context caps.
-  \item One-time compact retry on 413.
+  \item Direct string slices before Reader, Writer and Critic calls.
 \end{itemize}
 
 \textbf{Verification:} Standard pipeline live sources aur all four tutorial-aligned stages ke saath successfully run hui.
 
 \begin{answerbox}
-\textbf{STAR version:} Situation -- production-like run Critic stage par 413 se fail hua. Task -- evidence quality lose kiye bina token limit ke andar lana. Action -- per-stage token budgeting, bounded excerpts, output cap and compact retry add kiya. Result -- same four-stage flow end-to-end pass hua.
+\textbf{STAR version:} Situation -- production-like run Critic stage par 413 se fail hua. Task -- request ko provider limit ke andar lana. Action -- source count, excerpt size, prompt input and output size directly cap ki. Result -- same four-stage flow smaller predictable context ke saath run hui.
 \end{answerbox}
 
 \subsection{Problem 2: OpenAlex relevance weak thi}
@@ -715,7 +659,7 @@ GROQ_MODEL = "openai/gpt-oss-20b"
 
 \subsection{Problem 5: Deprecated provider model}
 
-Hardcoded model IDs time ke saath retire ho sakte hain. Defaults update hue, model names environment overrides se configurable rakhe gaye, aur multi-provider fallback add hua. Interview mein exact latest model se zyada important design point yeh hai ki provider/model configuration code se decoupled hai.
+Hardcoded model IDs time ke saath retire ho sakte hain. Isliye model names environment variables mein configurable rakhe gaye. Interview mein exact model se zyada important point hai ki model name source code edit kiye bina change ho sakta hai.
 
 \subsection{Problem 6: Git remote and non-fast-forward push}
 
@@ -769,7 +713,7 @@ Test & Purpose \\
 \code{python -m py_compile} & Syntax errors across app, agents, pipeline and tools. \\
 Utility assertions & Cleaning, query normalization, evidence formatting and export IDs. \\
 Provider construction & Correct model and max token configuration without full run. \\
-Live OpenAlex/news test & External collectors returned typed source records. \\
+Live OpenAlex/news test & External collectors returned structured source records. \\
 Single agent call & Provider SDK + prompt chain integration. \\
 Full Standard pipeline & All agent stages and export with live evidence. \\
 Streamlit health endpoint & Server process bound and served health route. \\
@@ -783,7 +727,7 @@ Streamlit AppTest & App rendered with zero exceptions; widgets detectable. \\
 \begin{enumerate}
   \item Mock requests for OpenAlex, RSS and Tavily response parsing.
   \item Query normalizer parameterized tests.
-  \item Provider routing matrix tests.
+  \item Gemini/Groq model creation tests.
   \item Pipeline tests with mocked agents and collector failures.
   \item Citation validator: every \code{[Sx]} in report exists in evidence.
   \item Prompt-injection regression cases.
@@ -854,12 +798,12 @@ Decision & Benefit & Trade-off \\
 \midrule
 Live APIs instead of vector DB & Fresh trends, no indexing pipeline & Coverage depends on upstream search and snippets. \\
 Sequential agents & Clear dependencies and audit trail & Multiple LLM calls increase latency/cost. \\
-Two-provider review & More independent critique & Two keys and provider variability. \\
+Optional Groq review & More independent critique when configured & Second key is optional. \\
 RSS for news & No extra paid API key & Redirect links, snippet-only content, locale bias. \\
 Streamlit & Very fast product UI & Less control than React/FastAPI architecture. \\
-Thread pool & Simple I/O concurrency & Threads are not ideal for CPU-heavy tasks. \\
+Sequential source calls & Easy to read and debug & Slower than parallel I/O. \\
 Markdown output & Easy render/export & Structured downstream analytics harder than strict JSON. \\
-Character clipping & Simple provider-independent guard & Character count is not exact token count and may remove middle context. \\
+Direct string limits & Simple context-size guard & Character count is not exact token count. \\
 Run-local IDs & Simple traceability & IDs do not persist across repeated runs. \\
 Low temperature & Stable analytical answers & Less diversity in phrasing/exploration. \\
 \bottomrule
@@ -870,7 +814,7 @@ Low temperature & Stable analytical answers & Less diversity in phrasing/explora
 Let \(S\) be number of selected source collectors and \(N\) total returned records.
 
 \begin{itemize}
-  \item Collector wall time with concurrency is approximately \(O(\max(T_1,\ldots,T_S))\), not sum, ignoring overhead.
+  \item Source wall time is approximately \(O(T_1+\cdots+T_S)\) because calls are sequential.
   \item Deduplication is expected \(O(N)\) using a set.
   \item Abstract reconstruction is \(O(W\log W)\) due to sorting word positions.
   \item LLM latency dominates end-to-end runtime because four model stages are sequential.
@@ -898,12 +842,12 @@ The Search stage combines an LLM search plan with deterministic HTTP/API tools. 
 
 \textbf{Q4. How does data move between agents?}
 \begin{answerbox}
-A shared state dictionary stores typed request data and string/list artifacts. Each stage consumes only the upstream artifacts it needs and appends its own output.
+A normal dictionary stores request data and each stage's output. Every stage reads the previous key and adds its own key.
 \end{answerbox}
 
 \textbf{Q5. Why not run all agents in parallel?}
 \begin{answerbox}
-The reasoning stages have true data dependencies. Only independent source calls are parallelized. Running dependent stages in parallel would require incomplete context or duplicated work.
+Each stage needs the previous result. I also kept source calls sequential because this is a learning-focused project; the small latency trade-off makes the code much easier to explain and debug.
 \end{answerbox}
 
 \subsection{Retrieval and evidence}
@@ -935,7 +879,7 @@ Full-text scraping creates robots, paywall, copyright, latency, parsing and secu
 
 \textbf{Q11. What happens if one source fails?}
 \begin{answerbox}
-Expected request/XML errors are caught per future, converted to warnings, and other successful sources continue. The report sees whatever evidence remains.
+Each source call has a small try/except. A failed API becomes a warning and the next selected source still runs.
 \end{answerbox}
 
 \subsection{LLMs and prompting}
@@ -947,12 +891,12 @@ Research synthesis benefits from consistency and lower variation. It is not zero
 
 \textbf{Q13. Why Gemini plus Groq?}
 \begin{answerbox}
-Gemini handles evidence-heavy synthesis, while a Groq-hosted model provides a fast independent adversarial pass. The main value is provider diversity and fallback, not a claim that one model is always universally best.
+Gemini handles Search, Reader and Writer. Groq handles the Critic so the report can be reviewed by a different model. This is a fixed, easy-to-explain rule rather than automatic routing.
 \end{answerbox}
 
 \textbf{Q14. What if one API key is absent?}
 \begin{answerbox}
-The routing plan detects configured providers. A single provider performs both primary and reviewer stages; if none exists, a clear configuration exception is raised.
+Google key is required because Gemini runs the research stages. Groq is optional; without it Gemini also runs the Critic. There are no additional provider fallbacks.
 \end{answerbox}
 
 \textbf{Q15. How do you control hallucination?}
@@ -972,24 +916,24 @@ It gives a consistent provider interface and composable prompt-model-parser pipe
 
 \textbf{Q18. How did you manage context limits?}
 \begin{answerbox}
-Bounded record counts, 500-character excerpts, stage-specific context caps, maximum output tokens, and one compact retry on HTTP 413.
+Bounded record counts, 500-character excerpts, direct string slices before each model call, and a maximum output-token setting.
 \end{answerbox}
 
 \subsection{Python and backend}
 
-\textbf{Q19. Why a frozen dataclass?}
+\textbf{Q19. Why normal function arguments instead of a request class?}
 \begin{answerbox}
-It documents the request contract, provides defaults, improves type clarity, and prevents accidental mutation while the pipeline is running.
+The project is small and interview-focused. Explicit function arguments keep the main pipeline call close to the tutorial and avoid introducing a class that adds little value here.
 \end{answerbox}
 
-\textbf{Q20. Why ThreadPoolExecutor instead of asyncio?}
+\textbf{Q20. Why are source calls sequential?}
 \begin{answerbox}
-The requests library is synchronous and there are only a few I/O tasks. A thread pool is simple and sufficient. At larger scale I would use an async HTTP client or background workers.
+The application calls only two or three sources. Sequential requests make control flow obvious. If latency becomes important, parallel I/O is a measured future optimization.
 \end{answerbox}
 
-\textbf{Q21. Why cache LLM clients?}
+\textbf{Q21. Why did you remove automatic provider routing and client caching?}
 \begin{answerbox}
-Provider clients can own HTTP connection pools and configuration. Caching by provider, model and output limit avoids repeated construction while keeping variants separate.
+They made a small learning project harder to explain. A fixed Gemini-research/Groq-critic rule is enough. I would add caching or routing only after profiling a real production workload.
 \end{answerbox}
 
 \textbf{Q22. Why expected exceptions only in collectors?}
@@ -1078,7 +1022,7 @@ Interview demo mein random clicking avoid karo. Yeh sequence follow karo:
   \item \textbf{Brief (25 sec):} Executive answer and inline \code{[Sx]} citations show karo.
   \item \textbf{Evidence (20 sec):} Same IDs, publication dates and original source links show karo.
   \item \textbf{Critical review (15 sec):} Weak claims and missing evidence show karo.
-  \item \textbf{Method/model routing (15 sec):} Gemini synthesis + Groq review explain karo.
+  \item \textbf{Models (15 sec):} simple rule explain karo---Gemini research, Groq review.
   \item \textbf{Close (10 sec):} Export and follow-up question demonstrate karo.
 \end{enumerate}
 
@@ -1093,9 +1037,9 @@ Live APIs unpredictable hote hain. Interview se pehle ek successful result ready
 
 \begin{itemize}
   \item Built and deployed an evidence-first multi-agent research platform that synthesizes recent scholarly and news sources into citation-mapped trend reports.
-  \item Upgraded a tutorial-based four-stage Search--Reader--Writer--Critic workflow with concurrent evidence collection, source IDs, and cross-provider review.
-  \item Implemented automatic Gemini/Groq routing, single-provider fallback, context budgeting, and compact retry to handle model and rate limits.
-  \item Reduced source collection latency through concurrent I/O and improved resilience with per-source timeouts, error isolation, deduplication, and stable source IDs.
+  \item Upgraded a tutorial-based four-stage Search--Reader--Writer--Critic workflow with live evidence, source IDs, and optional cross-provider review.
+  \item Used Gemini for research and an optional Groq critic, keeping model selection explicit and easy to maintain.
+  \item Improved source reliability with timeouts, simple per-source error handling, deduplication, and stable source IDs.
   \item Shipped a responsive Streamlit UI with evidence library, progress tracking, follow-up Q\&A, Markdown export, Docker health checks, and cloud secrets support.
 \end{itemize}
 
@@ -1110,7 +1054,7 @@ Live APIs unpredictable hote hain. Interview se pehle ek successful result ready
 
 \textbf{Situation:} Standard run failed on Groq with request-too-large error.\\
 \textbf{Task:} Preserve useful evidence while meeting account limits.\\
-\textbf{Action:} Measured stage context, bounded excerpts, capped outputs, clipped by stage, reduced source limits and added one compact retry.\\
+\textbf{Action:} Measured stage context, bounded excerpts, capped outputs, used direct per-stage slices, and reduced source limits.\\
 \textbf{Result:} Full Standard workflow passed with 12 live sources.
 
 % -----------------------------------------------------------------------------
@@ -1154,7 +1098,7 @@ Use LangGraph when query decomposition, iterative retrieval, evidence sufficienc
 \section{Rapid Revision Cheat Sheet}
 
 \begin{keybox}[Remember this flow]
-Question \(\rightarrow\) Scope \(\rightarrow\) Normalize query \(\rightarrow\) Parallel live retrieval \(\rightarrow\) Clean/dedup/ID \(\rightarrow\) Trend analysis \(\rightarrow\) Independent skepticism \(\rightarrow\) Final cited brief \(\rightarrow\) Evidence-bound Q\&A.
+Question \(\rightarrow\) Search plan + live sources \(\rightarrow\) Reader notes \(\rightarrow\) Writer report \(\rightarrow\) Critic feedback \(\rightarrow\) Evidence-bound Q\&A.
 \end{keybox}
 
 \begin{longtable}{p{.27\textwidth} p{.63\textwidth}}
@@ -1164,10 +1108,10 @@ Keyword & One-line memory \\
 Multi-agent & Specialized bounded stages, not unrestricted autonomy. \\
 RAG & Live API retrieval augmentation, not vector-store RAG. \\
 Grounding & Model receives actual source records and may cite only their IDs. \\
-Adversarial review & Another stage/provider tests bias and unsupported claims before final writing. \\
-Concurrency & Only independent I/O collectors run in parallel. \\
-Token budget & Bounded source count + excerpts + stage clipping + output cap + one retry. \\
-Fallback & If two providers unavailable, one configured provider handles all stages. \\
+Adversarial review & Optional Groq Critic checks the completed report. \\
+Execution & Stages and source calls are sequential for readability. \\
+Token budget & Bounded source count + excerpts + direct slices + output cap. \\
+Fallback & Only Groq is optional; Gemini is required and can also run the Critic. \\
 State & Request and every intermediate artifact kept in an inspectable dictionary. \\
 Security & Ignore instructions in evidence, escape HTML, validate URL schemes, hide secrets. \\
 Deployment & Streamlit Cloud secrets or Docker environment variables. \\
@@ -1181,7 +1125,7 @@ Main limitation & Snippet-level evidence and no deterministic citation entailmen
   \item ``I separate deterministic retrieval from probabilistic reasoning.''
   \item ``The Critic independently audits the completed report; an optional revision loop is the next improvement.''
   \item ``Citations are traceable IDs, but I do not claim that traceability alone guarantees truth.''
-  \item ``I parallelized independent I/O and kept dependent reasoning sequential.''
+  \item ``I kept the flow sequential so every stage is easy to explain and debug.''
   \item ``The next production improvement is automated claim-citation verification and persistent async jobs.''
 \end{enumerate}
 
@@ -1217,7 +1161,7 @@ Interview se pehle confirm karo:
   \item[$\square$] 60-second English and Hinglish pitch yaad hai.
   \item[$\square$] Architecture without screen draw kar sakte ho.
   \item[$\square$] Har file ki one-line responsibility bol sakte ho.
-  \item[$\square$] Why multi-agent, why two providers, why concurrent tools explain kar sakte ho.
+  \item[$\square$] Why four stages, why Gemini + optional Groq, and why sequential flow explain kar sakte ho.
   \item[$\square$] 413 token-limit STAR story ready hai.
   \item[$\square$] Honest limitations and next improvements ready hain.
   \item[$\square$] One successful demo query and result ready hai.

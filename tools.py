@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import re
 import xml.etree.ElementTree as ET
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, timedelta
 from typing import Any
 
@@ -140,7 +139,7 @@ def collect_evidence(
     use_news: bool = True,
     use_web: bool = False,
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Run selected collectors concurrently and return records plus warnings."""
+    """Run the selected search tools and return records plus warnings."""
     jobs = []
     if use_academic:
         jobs.append(("OpenAlex", search_openalex, (query, days, per_source)))
@@ -151,14 +150,11 @@ def collect_evidence(
 
     records: list[dict[str, Any]] = []
     warnings: list[str] = []
-    with ThreadPoolExecutor(max_workers=max(1, len(jobs))) as pool:
-        futures = {pool.submit(func, *args): name for name, func, args in jobs}
-        for future in as_completed(futures):
-            name = futures[future]
-            try:
-                records.extend(future.result())
-            except (requests.RequestException, ET.ParseError, ValueError) as exc:
-                warnings.append(f"{name} could not be reached ({exc.__class__.__name__}).")
+    for name, search_function, arguments in jobs:
+        try:
+            records.extend(search_function(*arguments))
+        except (requests.RequestException, ET.ParseError, ValueError):
+            warnings.append(f"{name} could not be reached.")
 
     seen: set[str] = set()
     unique = []
@@ -197,7 +193,7 @@ def format_evidence(records: list[dict[str, Any]]) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Tutorial-compatible tool names
+# Main Tools
 # ---------------------------------------------------------------------------
 def web_search(query: str) -> str:
     """Search live sources and return readable results, like the video tool.

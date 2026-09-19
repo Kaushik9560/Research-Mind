@@ -29,10 +29,9 @@ Never commit `.env` or `.streamlit/secrets.toml`.
 The included `Dockerfile` exposes port `8501` and includes a health check.
 Configure these environment variables in the hosting dashboard:
 
-- `GROQ_API_KEY` (required unless using another supported model provider)
+- `GROQ_API_KEY` (optional; enables the independent Critic model)
 - `GROQ_MODEL=openai/gpt-oss-20b`
-- `GOOGLE_API_KEY` and `GOOGLE_MODEL=gemini-3.6-flash` (recommended for
-  automatic multi-model routing)
+- `GOOGLE_API_KEY` (required) and `GOOGLE_MODEL=gemini-3.6-flash`
 - `MAX_OUTPUT_TOKENS=1400`
 - `TAVILY_API_KEY` (optional)
 
