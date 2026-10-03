@@ -1,4 +1,4 @@
-# InsightForge
+# ResearchMind
 
 InsightForge is a tutorial-shaped multi-agent research workspace for researchers,
 students, founders, policy teams, and anyone exploring a fast-moving domain. It
