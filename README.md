@@ -1,64 +1,83 @@
-# InsightForge
+# ResearchMind
 
-InsightForge is a tutorial-shaped multi-agent research workspace for researchers,
-students, founders, policy teams, and anyone exploring a fast-moving domain. It
-keeps the original project's simple Search → Reader → Writer → Critic flow while
-adding live academic/news evidence, citations, a second-model critic, and deployment.
+ResearchMind is a multi-agent AI research system that helps users research a topic using live academic, news, and web sources.
 
-## Research workflow
+The project follows a simple workflow:
 
-1. **Search Agent** scopes the question and searches OpenAlex, Google News, and
-   optional Tavily web results.
-2. **Reader Agent** reads all retrieved abstracts/snippets and compares findings,
-   recent signals, disagreements, and evidence gaps.
-3. **Writer Chain** uses the familiar `prompt | llm | output parser` pattern to
-   create the cited report.
-4. **Critic Chain** scores the report and highlights unsupported or overstated
-   claims.
+Search → Reader → Writer → Critic
 
-Gemini performs the Search, Reader, and Writer stages. Groq performs the Critic
-stage when its key is present; otherwise Gemini reviews its own report. This is
-the only model fallback in the project.
+The main idea is to divide the research process into separate stages so that each stage has a clear responsibility.
 
-Every collected source receives a stable ID such as `[S3]`. The report, Reader
-notes, Critic feedback, evidence library, and complete four-stage audit trail
-remain visible and can be exported as Markdown.
+## Research Workflow
 
-## How this extends the tutorial
+1. **Search Agent**  
+   It understands the user query and collects relevant information from OpenAlex, Google News, and optionally Tavily.
 
-| Tutorial concept | Production upgrade |
-|---|---|
-| Tavily search results | OpenAlex + Google News + optional Tavily |
-| Reader scrapes one URL | Reader compares every retrieved record |
-| One OpenAI model | Gemini research + optional Groq critic |
-| Writer report | Source-ID-grounded report with uncertainty |
-| Critic score | Citation and bias review using an independent provider |
-| Terminal output | Responsive Streamlit UI and downloadable audit trail |
+2. **Reader Agent**  
+   It reads the retrieved abstracts and snippets, compares the information, and identifies important findings, recent updates, disagreements, and evidence gaps.
 
-## Run locally
+3. **Writer Chain**  
+   It uses the `prompt | llm | output parser` flow to generate a structured research report using the collected sources.
+
+4. **Critic Chain**  
+   It reviews the generated report and checks for unsupported claims, bias, missing evidence, and overconfident statements.
+
+Gemini is used for the Search, Reader, and Writer stages.
+
+If a Groq API key is available, Groq is used for the Critic stage. Otherwise, Gemini is used for the review as well.
+
+Each retrieved source is assigned a stable source ID such as `[S1]`, `[S2]`, or `[S3]`.
+
+These source IDs are used in the generated report so that the information can be linked back to the retrieved evidence.
+
+The application also shows the Reader notes, Critic feedback, source list, and the complete research flow. The final report can be downloaded as a Markdown file.
+
+## Tech Stack
+
+- Python
+- LangChain
+- Streamlit
+- Google Gemini
+- Groq
+- OpenAlex
+- Google News RSS
+- Tavily
+
+## Run Locally
 
 ```bash
 cd multi-agent-Project/Multi-agent-research-system
+
 python3 -m venv .venv
+
 source .venv/bin/activate
+
 pip install -r requirements.txt
+
 cp .env.example .env
-# Add GOOGLE_API_KEY; GROQ_API_KEY is optional
+
 streamlit run app.py
 ```
 
-The app also discovers a `.env` file in a parent directory, so an existing repo
-configuration can be reused. OpenAlex and Google News do not require API keys.
-Tavily is optional.
+Add your `GOOGLE_API_KEY` in the `.env` file.
 
-## Deploy
+`GROQ_API_KEY` is optional.
 
-The app is ready for Streamlit Community Cloud and Docker-based platforms.
-See [DEPLOYMENT.md](DEPLOYMENT.md) for the entrypoint, secrets, and commands.
+OpenAlex and Google News do not require API keys.
 
-## Notes
+Tavily is also optional and is used only when its API key is available.
 
-- Live-source availability depends on the upstream services and network access.
-- News aggregation links may redirect through Google News.
-- Model-generated synthesis can still be wrong. Verify high-stakes claims against
-  the linked primary sources.
+The project can also detect a `.env` file from a parent directory, so an existing configuration can be reused.
+
+## Deployment
+
+The application can be deployed using Streamlit Community Cloud or Docker-based platforms.
+
+Deployment-related configuration and commands are available in `DEPLOYMENT.md`.
+
+## Important Notes
+
+- Live results depend on the availability of external services.
+- Google News links may redirect through Google News.
+- AI-generated reports can still contain mistakes.
+- Important information should always be verified using the original sources.
