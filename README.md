@@ -1,83 +1,90 @@
 # ResearchMind
 
-ResearchMind is a multi-agent AI research system that helps users research a topic using live academic, news, and web sources.
+A multi-agent research assistant built with Python, LangChain, and Streamlit,
+with a simple, sequential workflow:
 
-The project follows a simple workflow:
+**Search → Reader → Writer → Critic**
 
-Search → Reader → Writer → Critic
+It collects academic abstracts, news snippets, and optional web results, compares
+them, writes a cited report, and reviews the report against the collected evidence.
+Gemini runs research. Groq runs the critic when configured; otherwise Gemini
+performs the review too.
 
-The main idea is to divide the research process into separate stages so that each stage has a clear responsibility.
+## Understand the code
 
-## Research Workflow
+| File | Job |
+| --- | --- |
+| `tools.py` | Retrieve and normalize sources; assign citation IDs |
+| `agents.py` | Configure models and build role-specific prompt/model/parser chains |
+| `pipeline.py` | Run the four stages in order and export Markdown |
+| `app.py` | Streamlit form, progress, result tabs, and follow-up chat |
+| `dry_run.py` | Execute the real flow with fictional responses, offline |
 
-1. **Search Agent**  
-   It understands the user query and collects relevant information from OpenAlex, Google News, and optionally Tavily.
+The Search model plans the research. Python creates the keyword query and calls
+OpenAlex, Google News RSS, and optional Tavily. The Reader compares the returned
+abstracts/snippets. Source IDs such as `[S1]` map report citations to source links.
+The critic produces feedback; it does not automatically rewrite the report.
 
-2. **Reader Agent**  
-   It reads the retrieved abstracts and snippets, compares the information, and identifies important findings, recent updates, disagreements, and evidence gaps.
+See [the current interview guide](docs/INTERVIEW_GUIDE.md) for every function's
+inputs, output, purpose, a worked dry run, and interview questions. Earlier
+handbooks describe previous versions.
 
-3. **Writer Chain**  
-   It uses the `prompt | llm | output parser` flow to generate a structured research report using the collected sources.
+## Tech stack
 
-4. **Critic Chain**  
-   It reviews the generated report and checks for unsupported claims, bias, missing evidence, and overconfident statements.
+Python, LangChain, Streamlit, Google Gemini, Groq, OpenAlex, Google News RSS,
+and optional Tavily.
 
-Gemini is used for the Search, Reader, and Writer stages.
-
-If a Groq API key is available, Groq is used for the Critic stage. Otherwise, Gemini is used for the review as well.
-
-Each retrieved source is assigned a stable source ID such as `[S1]`, `[S2]`, or `[S3]`.
-
-These source IDs are used in the generated report so that the information can be linked back to the retrieved evidence.
-
-The application also shows the Reader notes, Critic feedback, source list, and the complete research flow. The final report can be downloaded as a Markdown file.
-
-## Tech Stack
-
-- Python
-- LangChain
-- Streamlit
-- Google Gemini
-- Groq
-- OpenAlex
-- Google News RSS
-- Tavily
-
-## Run Locally
+## Run locally
 
 ```bash
-cd multi-agent-Project/Multi-agent-research-system
-
 python3 -m venv .venv
-
 source .venv/bin/activate
-
 pip install -r requirements.txt
-
 cp .env.example .env
-
+# Set GOOGLE_API_KEY in .env. GROQ_API_KEY is optional.
 streamlit run app.py
 ```
 
-Add your `GOOGLE_API_KEY` in the `.env` file.
+A `.env` file in a parent directory is also discovered. Model names and output
+token limits can be configured there (default output budget: 4096 tokens). Streamlit Cloud settings use `st.secrets`.
+OpenAlex supports basic keyless queries and an optional `OPENALEX_API_KEY` for a
+larger budget; see [its authentication docs](https://help.openalex.org/api/authentication/).
+Google News RSS needs no key. Tavily requires `TAVILY_API_KEY`.
 
-`GROQ_API_KEY` is optional.
+The UI includes question examples, time/depth/language/domain/region/audience
+options, stage progress, five result tabs, source filtering, Markdown download,
+and follow-up answers using the existing research context.
 
-OpenAlex and Google News do not require API keys.
+## Offline interview demo
 
-Tavily is also optional and is used only when its API key is available.
+```bash
+python dry_run.py
+```
 
-The project can also detect a `.env` file from a parent directory, so an existing configuration can be reused.
+No keys or network access required. The demo prints actual formatted prompts,
+search requests, sample responses, stage progress, result dictionary keys, and
+exported Markdown. It uses the real pipeline and source parsers. All model
+answers and source records are fictional and labelled as samples.
 
-## Deployment
+## Check the project
 
-The application can be deployed using Streamlit Community Cloud or Docker-based platforms.
+```bash
+python -m unittest discover -s tests -v
+```
 
-Deployment-related configuration and commands are available in `DEPLOYMENT.md`.
+Tests use sample responses to verify retrieval parsing, failures, citations,
+model fallback, pipeline wiring, export, and Streamlit interactions.
 
-## Important Notes
+To run live research from a terminal:
 
-- Live results depend on the availability of external services.
-- Google News links may redirect through Google News.
-- AI-generated reports can still contain mistakes.
-- Important information should always be verified using the original sources.
+```bash
+python pipeline.py
+```
+
+## Deployment and limits
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Streamlit Cloud and Docker instructions.
+Live runs depend on your API credentials, quota, and network. The Reader uses
+abstracts/snippets and model inputs have character limits; full sources remain
+available in the UI/export. The critique and citations help inspect claims but
+do not guarantee factual accuracy.

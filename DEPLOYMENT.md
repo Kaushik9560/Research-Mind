@@ -1,4 +1,4 @@
-# Deploy InsightForge
+# Deploy ResearchMind
 
 ## Streamlit Community Cloud (recommended)
 
@@ -15,12 +15,14 @@
    GROQ_MODEL = "openai/gpt-oss-20b"
    GOOGLE_API_KEY = "your-key"
    GOOGLE_MODEL = "gemini-3.6-flash"
-   MAX_OUTPUT_TOKENS = "1400"
+   MAX_OUTPUT_TOKENS = "4096"
    # Optional
    TAVILY_API_KEY = "your-key"
+   OPENALEX_API_KEY = "your-key"
    ```
 
-5. Deploy. OpenAlex and Google News need no additional secrets.
+5. Deploy. Google News needs no key. OpenAlex supports basic keyless queries;
+   an optional `OPENALEX_API_KEY` increases its budget.
 
 Never commit `.env` or `.streamlit/secrets.toml`.
 
@@ -32,12 +34,13 @@ Configure these environment variables in the hosting dashboard:
 - `GROQ_API_KEY` (optional; enables the independent Critic model)
 - `GROQ_MODEL=openai/gpt-oss-20b`
 - `GOOGLE_API_KEY` (required) and `GOOGLE_MODEL=gemini-3.6-flash`
-- `MAX_OUTPUT_TOKENS=1400`
+- `MAX_OUTPUT_TOKENS=4096`
 - `TAVILY_API_KEY` (optional)
+- `OPENALEX_API_KEY` (optional; increases the academic search budget)
 
 Build locally with:
 
 ```bash
-docker build -t insightforge .
-docker run --rm -p 8501:8501 --env-file .env insightforge
+docker build -t researchmind .
+docker run --rm -p 8501:8501 --env-file .env researchmind
 ```
